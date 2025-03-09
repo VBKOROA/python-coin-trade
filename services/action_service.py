@@ -41,7 +41,7 @@ class ActionService:
         Returns:
             Decision: 거래 결정 결과를 포함하는 객체.
         비고:
-            이 메서드는 비동기적으로 작동하며, UpbitClient를 사용하여 15분 및 5분 간격의 캔들 데이터를 가져옵니다.
+            이 메서드는 비동기적으로 작동하며, UpbitClient를 사용하여 15분 및 1시간 간격의 캔들 데이터를 가져옵니다.
             가져온 데이터는 LLM 요청 구조에 삽입되어 최종 거래 결정을 생성합니다.
         """
         
@@ -50,7 +50,7 @@ class ActionService:
 
         # LLM 요청 구조에 캔들 데이터 삽입
         prompt = prompt.replace("$15m_candle_data", self.__candle_service.candle_to_yaml(candle_chart.candles_15m))
-        prompt = prompt.replace("$5m_candle_data", self.__candle_service.candle_to_yaml(candle_chart.candles_5m))
+        prompt = prompt.replace("$1h_candle_data", self.__candle_service.candle_to_yaml(candle_chart.candles_1h))
         prompt = prompt.replace("$current_price", str(candle_chart.current_price))
 
         # LLM 응답 생성

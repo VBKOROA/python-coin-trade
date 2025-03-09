@@ -25,7 +25,7 @@ def execute_trade_logic_test(trade_service: TradeService):
 if __name__ == "__main__":
     try:
         s_pack = sgtPack()
-        buy_coin_test(s_pack.action_log_repo)
+        execute_trade_logic_test(s_pack.trade_service)
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
     finally:

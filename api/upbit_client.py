@@ -19,7 +19,7 @@ class UpbitClient:
         시간대 문자열을 분 단위로 변환합니다.
         
         Args:
-            timeframe (str): 시간대 (예: '15m', '5m').
+            timeframe (str): 시간대 (예: '15m', '1h').
             
         Returns:
             int: 분 단위의 시간.
@@ -29,7 +29,7 @@ class UpbitClient:
         """
         timeframe_units = {
             '15m': 15,
-            '5m': 5
+            '1h': 60,
         }
         unit = timeframe_units.get(timeframe)
         if not unit:
@@ -41,7 +41,7 @@ class UpbitClient:
         현재 시간에서 가장 가까운 완료된 캔들 시간을 계산합니다.
         
         Args:
-            timeframe (str): 시간대 (예: '15m', '5m').
+            timeframe (str): 시간대 (예: '15m', '1h').
             
         Returns:
             datetime: 완료된 캔들의 시간.
@@ -51,10 +51,9 @@ class UpbitClient:
         if timeframe == '15m':
             # 15분 단위로 시간 맞추기
             now = now - timedelta(minutes=now.minute % 15, seconds=now.second, microseconds=now.microsecond)
-        elif timeframe == '5m':
-            # 5분 단위로 시간 맞추기
-            now = now - timedelta(minutes=now.minute % 5, seconds=now.second, microseconds=now.microsecond)
-            
+        elif timeframe == '1h':
+            # 1시간 단위로 시간 맞추기
+            now = now - timedelta(minutes=now.minute % 60, seconds=now.second, microseconds=now.microsecond)
         return now
     
     def __filter_incomplete_candles(self, data: list, completed_time: datetime) -> list:
@@ -87,7 +86,7 @@ class UpbitClient:
         Args:
             market (str): 시장 코드 (예: 'KRW-BTC').
             count (int): 요청할 캔들 데이터의 개수.
-            timeframe (str): 시간대 (예: '15m', '5m').
+            timeframe (str): 시간대 (예: '15m', '1h').
             session: aiohttp 클라이언트 세션 객체.
         Returns:
             list: 과거 순으로 정렬된 캔들 데이터 리스트.
@@ -110,16 +109,16 @@ class UpbitClient:
         Args:
             market (str): 시장 코드 (예: 'KRW-BTC').
         Returns:
-            CandleChart: 5분 및 15분 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
+            CandleChart: 15분 및 1시간 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
         """
         candle_chart = CandleChart()
         candle_chart.set_market(self.__MARKET)
         async with aiohttp.ClientSession() as session:
-            candles_15m, candles_5m = await asyncio.gather(
-                self.__get_candle_data(20, '15m', session),
-                self.__get_candle_data(50, '5m', session)
+            candles_15m, candles_1h = await asyncio.gather(
+                self.__get_candle_data(5, '15m', session),
+                self.__get_candle_data(5, '1h', session)
             )
-            candle_chart.set_candles_5m(candles_5m)
+            candle_chart.set_candles_1h(candles_1h)
             candle_chart.set_candles_15m(candles_15m)
-            candle_chart.set_current_price(candles_5m[-1]['trade_price'])
+            candle_chart.set_current_price(candles_15m[-1]['trade_price'])
         return candle_chart

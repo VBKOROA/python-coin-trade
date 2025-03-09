@@ -18,12 +18,12 @@
 
 ### 5 Minute Candles
 ```yaml
-$5m_candle_data
+$15m_candle_data
 ```
 
 ### 15 Minute Candles
 ```yaml
-$15m_candle_data
+$1h_candle_data
 ```
 
 ### Current price
