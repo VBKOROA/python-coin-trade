@@ -114,7 +114,7 @@ class UpbitClient:
         candle_chart.set_market(self.__MARKET)
         async with aiohttp.ClientSession() as session:
             candles_15m, candles_1h = await asyncio.gather(
-                self.__get_candle_data(5, '15m', session),
+                self.__get_candle_data(20, '15m', session),
                 self.__get_candle_data(5, '1h', session)
             )
             candle_chart.set_candles_1h(candles_1h)
