@@ -8,7 +8,7 @@ from repos.llm_log_repo import LLMLogRepo
 from models.candle_chart import CandleChart
 from api.gemini_client import GeminiClient
 from services.candle_service import CandleService
-from repos.action_log_repo import ActionRepo
+from repos.action_log_repo import ActionLogRepo
 
 class ActionService:
     def __init__(self, llm_request_scheme: str, dca: float):
@@ -21,8 +21,8 @@ class ActionService:
     def set_candle_service(self, candle_service: CandleService):
         self.__candle_service = candle_service
         
-    def set_action_repo(self, action_repo: ActionRepo):
-        self.__action_repo = action_repo
+    def set_action_log_repo(self, action_log_repo: ActionLogRepo):
+        self.__action_log_repo = action_log_repo
         
     def set_coin_repo(self, coin_repo: CoinRepo):
         self.__coin_repo = coin_repo
@@ -70,7 +70,7 @@ class ActionService:
         비고:
             이 메서드는 ActionRepo를 사용하여 거래 로그를 데이터베이스에 기록합니다.
         """
-        price = self.__action_repo.sell_coin(current_price, coin)
+        price = self.__action_log_repo.sell_coin(current_price, coin)
         self.__coin_repo.sell_coin(coin['id'])
         self.__info_repo.plus_balance(1, price)
         
@@ -84,6 +84,6 @@ class ActionService:
             이 메서드는 ActionRepo를 사용하여 거래 로그를 데이터베이스에 기록합니다.
         """
         price = balance * Decimal(self.__DCA)
-        amount = self.__action_repo.buy_coin(decision.market, decision.current_price, price)
+        amount = self.__action_log_repo.buy_coin(decision.market, decision.current_price, price)
         self.__coin_repo.buy_coin(decision, amount)
         self.__info_repo.minus_balance(1, price)

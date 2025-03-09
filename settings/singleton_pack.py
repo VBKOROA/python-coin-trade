@@ -9,7 +9,7 @@ from services.candle_service import CandleService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
 from repos.coin_repo import CoinRepo
-from repos.action_log_repo import ActionRepo
+from repos.action_log_repo import ActionLogRepo
 from repos.llm_log_repo import LLMLogRepo
 
 class SingletonPack:
@@ -49,7 +49,7 @@ class SingletonPack:
             dca=self.DCA
         ))
         self.set_info_repo(InfoRepo())
-        self.set_action_repo(ActionRepo())
+        self.set_action_log_repo(ActionLogRepo())
         self.set_llm_log_repo(LLMLogRepo())
         self.set_coin_repo(CoinRepo())
         self.set_candle_service(CandleService())
@@ -58,10 +58,10 @@ class SingletonPack:
         
     def initialize_dependencies(self):
         self.info_repo.set_dbms(self.dbms)
-        self.action_repo.set_dbms(self.dbms)
+        self.action_log_repo.set_dbms(self.dbms)
         self.llm_log_repo.set_dbms(self.dbms)
         self.coin_repo.set_dbms(self.dbms)
-        self.action_service.set_action_repo(self.action_repo)
+        self.action_service.set_action_log_repo(self.action_log_repo)
         self.action_service.set_candle_service(self.candle_service)
         self.action_service.set_coin_repo(self.coin_repo)
         self.action_service.set_info_repo(self.info_repo)
@@ -97,8 +97,8 @@ class SingletonPack:
     def set_coin_repo(self, coin_repo: CoinRepo):
         self.coin_repo = coin_repo
         
-    def set_action_repo(self, action_repo: ActionRepo):
-        self.action_repo = action_repo
+    def set_action_log_repo(self, action_log_repo: ActionLogRepo):
+        self.action_log_repo = action_log_repo
         
     def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
         self.llm_log_repo = llm_log_repo

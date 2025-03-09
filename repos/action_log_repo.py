@@ -1,12 +1,12 @@
 from decimal import Decimal
 from settings.db_connection import DBMS
 
-class ActionRepo:
+class ActionLogRepo:
     def __init__(self):
         self.FEE_RATE = Decimal(0.9995) 
     
     def set_dbms(self, dbms: DBMS):
-        self.dbms = dbms
+        self.__dbms = dbms
         
     def sell_coin(self, current_price, coin) -> Decimal:
         market = coin['market']

@@ -30,9 +30,7 @@ $15m_candle_data
 $current_price
 
 ## Additional Considerations
-*   **Please make a decision based on the current data, as no further data will be provided.**
-*   Analyze charts in various ways.
+*   Please make a decision based on the current data, as no further data will be provided.
 *   Please consider fees.
     *   **Fee** = `Transaction Amount (Number of Shares x Transaction Price) x 0.05%`
 *   Think step by step by step by step by step.
-
