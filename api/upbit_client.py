@@ -84,7 +84,6 @@ class UpbitClient:
         """
         주어진 시장, 개수, 시간대에 따라 캔들 데이터를 비동기적으로 가져옵니다.
         Args:
-            market (str): 시장 코드 (예: 'KRW-BTC').
             count (int): 요청할 캔들 데이터의 개수.
             timeframe (str): 시간대 (예: '15m', '1h').
             session: aiohttp 클라이언트 세션 객체.
