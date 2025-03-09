@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "buy",
+          "wait"
+        ]
+      },
+      "target_price": {
+        "type": "integer"
+      },
+      "stop_loss_price": {
+        "type": "integer"
+      },
+      "reason": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "action",
+      "reason"
+    ]
+  }
