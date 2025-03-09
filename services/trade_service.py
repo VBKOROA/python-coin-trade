@@ -2,6 +2,7 @@ from api.upbit_client import UpbitClient
 from repos.coin_repo import CoinRepo
 from repos.info_repo import InfoRepo
 from services.action_service import ActionService
+from pymysql.connections import Connection
 
 class TradeService:
     def set_upbit_client(self, upbit_client: UpbitClient):
@@ -16,7 +17,7 @@ class TradeService:
     def set_info_repo(self, info_repo: InfoRepo):
         self.__info_repo = info_repo
         
-    def set_conn(self, conn):
+    def set_conn(self, conn: Connection):
         self.__conn = conn
         
     async def execute_trade_logic(self):
