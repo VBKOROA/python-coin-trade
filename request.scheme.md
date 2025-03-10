@@ -4,8 +4,8 @@
 
 1.  **Optimal Action:** (Buy / Wait)
 2.  **If Buy:**
-    *   **Target Price:** (Sell price if going up)
-    *   **Stop-Loss Price:** (Sell price if going down)
+    *   **Target Price:** A price at sell to take a profit.
+    *   **Stop-Loss Price:** A price at sell to limit potential losses.
 3.  **Reason:** Clear and concise justification for the above decisions (minimize sentence as possible)
 
 ## Recent Candlestick Data
@@ -16,12 +16,12 @@
 - `low`: low price
 - `volume`: accumulated trading volume
 
-### 5 Minute Candles
+### 15 Hour Candles
 ```yaml
 $15m_candle_data
 ```
 
-### 15 Minute Candles
+### 1 Hour Candles
 ```yaml
 $1h_candle_data
 ```
