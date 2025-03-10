@@ -1,13 +1,12 @@
 class Decision:
     def __init__(self, decision: dict):
         self.action = decision["action"]
+        self.target_price = 0
+        self.stop_loss_price = 0
         
         if self.action == "buy":
             self.target_price = int(decision["target_price"])
             self.stop_loss_price = int(decision["stop_loss_price"])
-        else:
-            self.target_price = 0
-            self.stop_loss_price = 0
             
         self.reason = decision["reason"]
         
