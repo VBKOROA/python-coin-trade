@@ -16,7 +16,7 @@
 - `low`: low price
 - `volume`: accumulated trading volume
 
-### 15 Hour Candles
+### 15 Minute Candles
 ```yaml
 $15m_candle_data
 ```
