@@ -24,7 +24,7 @@ class SingletonPack:
         self.LLM_RESPONSE_SCHEME = open("response.scheme.json", "r").read() # LLM 응답 구조
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
-        print(self.MARKET)
+        print(f"거래 종목 설정: {self.MARKET}")
         
         # DCA 비율 설정
         temp = os.environ.get("DCA")
