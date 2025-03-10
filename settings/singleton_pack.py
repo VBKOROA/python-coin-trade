@@ -1,4 +1,5 @@
 import os
+import json
 
 from dotenv import load_dotenv
 from api.gemini_client import GeminiClient
@@ -24,11 +25,27 @@ class SingletonPack:
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
         print(self.MARKET)
+        
+        # DCA 비율 설정
         temp = os.environ.get("DCA")
         if temp is None:
             self.DCA = 1.0
         else:
             self.DCA = int(temp) / 100 # DCA 비율 (ex. 0.01 = 1%)
+            
+        # 시간대 설정 로드 (환경 변수 또는 기본값 사용)
+        timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
+        if timeframe_config_str:
+            try:
+                self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
+                print(f"시간대 설정 로드: {self.TIMEFRAME_CONFIG}")
+            except json.JSONDecodeError:
+                print("시간대 설정 파싱 오류, 기본 설정 사용")
+                self.TIMEFRAME_CONFIG = {'15m': 20, '1h': 5, '4h': 10}
+        else:
+            # 기본 시간대 설정
+            self.TIMEFRAME_CONFIG = {'15m': 20, '1h': 5, '4h': 10}
+            print(f"기본 시간대 설정 사용: {self.TIMEFRAME_CONFIG}")
 
         # 싱글톤
         self.set_dbms(DBMS(
@@ -72,6 +89,8 @@ class SingletonPack:
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_info_repo(self.info_repo)
         self.trade_service.set_conn(self.dbms.conn)
+        # 시간대 설정 적용
+        self.trade_service.set_timeframe_config(self.TIMEFRAME_CONFIG)
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service

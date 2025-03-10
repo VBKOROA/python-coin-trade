@@ -9,10 +9,10 @@ from settings.singleton_pack import SingletonPack
 async def main(trade_service: TradeService):
     while(True):
         # 현재 초가 0초고
-        # 15분으로 나누어 떨어질때 작동
+        # 5분으로 나누어 떨어질때 작동
         # 아니면 continue
         now = datetime.datetime.now()
-        if now.second == 0 and now.minute % 15 == 0:
+        if now.second == 0 and now.minute % 5 == 0:
             await trade_service.execute_trade_logic()
         else:
             await asyncio.sleep(1)

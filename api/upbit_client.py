@@ -7,6 +7,23 @@ from models.candle_chart import CandleChart
 class UpbitClient:
     def __init__(self, market: str):
         self.__MARKET = market
+        # 지원하는 시간대와 각 시간대별 분 단위 매핑
+        self.__TIMEFRAME_UNITS = {
+            '1m': 1,
+            '3m': 3,
+            '5m': 5,
+            '10m': 10,
+            '15m': 15,
+            '30m': 30,
+            '1h': 60,
+            '4h': 240,
+            '1d': 1440,  # 하루는 1440분
+        }
+        # 기본 설정: 캔들 개수
+        self.__DEFAULT_CANDLE_COUNTS = {
+            '15m': 20,
+            '1h': 5,
+        }
         
     async def __req_data(self, unit: int, params: dict, session):
         url = f"https://api.upbit.com/v1/candles/minutes/{unit}"
@@ -27,11 +44,7 @@ class UpbitClient:
         Raises:
             ValueError: 지원하지 않는 시간대가 주어졌을 때 발생.
         """
-        timeframe_units = {
-            '15m': 15,
-            '1h': 60,
-        }
-        unit = timeframe_units.get(timeframe)
+        unit = self.__TIMEFRAME_UNITS.get(timeframe)
         if not unit:
             raise ValueError(f"지원하지 않는 시간대입니다: {timeframe}")
         return unit
@@ -47,13 +60,12 @@ class UpbitClient:
             datetime: 완료된 캔들의 시간.
         """
         now = datetime.now()
+        unit = self.__get_timeframe_unit(timeframe)
         
-        if timeframe == '15m':
-            # 15분 단위로 시간 맞추기
-            now = now - timedelta(minutes=now.minute % 15, seconds=now.second, microseconds=now.microsecond)
-        elif timeframe == '1h':
-            # 1시간 단위로 시간 맞추기
-            now = now - timedelta(minutes=now.minute % 60, seconds=now.second, microseconds=now.microsecond)
+        # 시간대의 분 단위로 현재 시간을 조정
+        minutes_to_subtract = now.minute % unit
+        now = now - timedelta(minutes=minutes_to_subtract, seconds=now.second, microseconds=now.microsecond)
+        
         return now
     
     def __filter_incomplete_candles(self, data: list, completed_time: datetime) -> list:
@@ -67,13 +79,16 @@ class UpbitClient:
         Returns:
             list: 필터링된 캔들 데이터 리스트 (과거 순서로 정렬됨).
         """
+        if not data:
+            return []
+            
         latest_candle = data[0]
         latest_candle_time = datetime.fromisoformat(latest_candle['candle_date_time_kst'])
         
         if latest_candle_time >= completed_time:
             # 완료되지 않은 최신 캔들 제거
             data.pop(0)
-        else:
+        elif len(data) > 1:  # 1개 이상의 캔들이 있을 때만 마지막 캔들 제거 고려
             # 완료된 최고 캔들 제거
             data.pop(-1)
         
@@ -102,22 +117,60 @@ class UpbitClient:
         
         return self.__filter_incomplete_candles(data, completed_time)
     
-    async def fetch_candle_chart(self) -> CandleChart:
+    async def fetch_candle_chart(self, timeframe_config=None) -> CandleChart:
         """
         주어진 시장에 대한 캔들 차트를 비동기적으로 가져옵니다.
         Args:
-            market (str): 시장 코드 (예: 'KRW-BTC').
+            timeframe_config (dict, optional): 시간대별 캔들 개수 구성. 기본값은 None.
+                예: {'15m': 20, '1h': 5, '4h': 10}
+                
         Returns:
-            CandleChart: 15분 및 1시간 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
+            CandleChart: 요청한 시간대의 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
         """
         candle_chart = CandleChart()
         candle_chart.set_market(self.__MARKET)
+        
+        # 기본 설정 사용 또는 사용자 정의 설정 적용
+        if not timeframe_config:
+            timeframe_config = self.__DEFAULT_CANDLE_COUNTS
+            
         async with aiohttp.ClientSession() as session:
-            candles_15m, candles_1h = await asyncio.gather(
-                self.__get_candle_data(20, '15m', session),
-                self.__get_candle_data(5, '1h', session)
-            )
-            candle_chart.set_candles_1h(candles_1h)
-            candle_chart.set_candles_15m(candles_15m)
-            candle_chart.set_current_price(candles_15m[-1]['trade_price'])
+            tasks = []
+            
+            # 각 시간대별 캔들 데이터 요청 태스크 생성
+            for timeframe, count in timeframe_config.items():
+                tasks.append(self.__get_candle_data(count, timeframe, session))
+                
+            # 모든 요청 동시 처리
+            results = await asyncio.gather(*tasks)
+            
+            # 결과 처리 및 CandleChart에 설정
+            for i, timeframe in enumerate(timeframe_config.keys()):
+                candles = results[i]
+                candle_chart.set_candles(timeframe, candles)
+                
+            # 현재 가격 설정 (가장 작은 시간대의 마지막 캔들 종가 사용)
+            smallest_timeframe = min(timeframe_config.keys(), 
+                                    key=lambda x: self.__get_timeframe_unit(x))
+            if results[list(timeframe_config.keys()).index(smallest_timeframe)]:
+                candle_chart.set_current_price(
+                    results[list(timeframe_config.keys()).index(smallest_timeframe)][-1]['trade_price']
+                )
+                
+        return candle_chart
+        
+    # 이전 버전 호환성을 위한 메소드
+    async def fetch_candles_legacy(self) -> CandleChart:
+        """
+        기존 방식과의 호환성을 위한 메소드로, 15분과 1시간 캔들만 가져옵니다.
+        
+        Returns:
+            CandleChart: 15분 및 1시간 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
+        """
+        candle_chart = await self.fetch_candle_chart({'15m': 20, '1h': 5})
+        
+        # 기존 코드와의 호환성을 위해 candles_15m, candles_1h 속성 추가
+        candle_chart.candles_15m = candle_chart.get_candles('15m')
+        candle_chart.candles_1h = candle_chart.get_candles('1h')
+        
         return candle_chart

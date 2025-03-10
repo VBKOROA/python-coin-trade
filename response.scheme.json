@@ -20,6 +20,8 @@
     },
     "required": [
       "action",
-      "reason"
+      "reason",
+      "target_price",
+      "stop_loss_price"
     ]
   }

@@ -1,5 +1,7 @@
+import datetime
 from decimal import Decimal
 import json
+import re
 
 from models.decision import Decision
 from repos.coin_repo import CoinRepo
@@ -41,17 +43,36 @@ class ActionService:
         Returns:
             Decision: 거래 결정 결과를 포함하는 객체.
         비고:
-            이 메서드는 비동기적으로 작동하며, UpbitClient를 사용하여 15분 및 1시간 간격의 캔들 데이터를 가져옵니다.
-            가져온 데이터는 LLM 요청 구조에 삽입되어 최종 거래 결정을 생성합니다.
+            이 메서드는 비동기적으로 작동하며, 캔들 차트에서 다양한 시간대의 캔들 데이터를 가져와
+            LLM 요청 구조에 삽입하여 최종 거래 결정을 생성합니다.
         """
         
         # LLM 요청 구조 복사
         prompt = self.__LLM_REQUEST_SCHEME
-
-        # LLM 요청 구조에 캔들 데이터 삽입
-        prompt = prompt.replace("$15m_candle_data", self.__candle_service.candle_to_yaml(candle_chart.candles_15m))
-        prompt = prompt.replace("$1h_candle_data", self.__candle_service.candle_to_yaml(candle_chart.candles_1h))
+        
+        # 모든 시간대의 캔들 데이터를 LLM 요청 구조에 삽입
+        timeframes = candle_chart.get_all_timeframes()
+        
+        # 요청 스키마에서 캔들 데이터 플레이스홀더 패턴 찾기
+        # 예: $15m_candle_data, $1h_candle_data, $4h_candle_data 등
+        candle_placeholders = re.findall(r'\$([0-9]+[mhdw])_candle_data', prompt)
+        
+        # 시간대별 캔들 데이터 삽입
+        for timeframe in candle_placeholders:
+            placeholder = f"${timeframe}_candle_data"
+            if timeframe in timeframes:
+                candles = candle_chart.get_candles(timeframe)
+                yaml_data = self.__candle_service.candle_to_yaml(candles)
+                prompt = prompt.replace(placeholder, yaml_data)
+            else:
+                # 요청된 시간대의 데이터가 없는 경우 빈 데이터 표시
+                prompt = prompt.replace(placeholder, "No data available for this timeframe")
+        
+        # 현재 가격 삽입
         prompt = prompt.replace("$current_price", str(candle_chart.current_price))
+        
+        # 현재 시간 삽입 (datetime 사용) (yyyy-MM-dd'T'HH:mm:ss 형식)
+        prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
         # LLM 응답 생성
         decision = Decision(json.loads(self.__gemini_client.generate_answer(prompt)))  
