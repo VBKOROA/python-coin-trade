@@ -1,6 +1,6 @@
 # Trading Decision Request
 
-**Request:** Analyze the provided recent candlestick data to develop the following trading strategy:
+**Request:** Analyze all the provided latest candlestick data to develop the following trading strategy:
 
 1.  **Optimal Action:** (Buy / Wait)
 2.  **If Buy:**
@@ -34,4 +34,4 @@ $5m_candle_data
 *   Please make a decision based on the current data, as no further data will be provided.
 *   Please consider fees.
     *   **Fee** = `Transaction Amount (Number of Shares x Transaction Price) x 0.05%`
-*   Think step by step by step by step by step.
+*   Think step by step.

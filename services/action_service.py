@@ -104,7 +104,7 @@ class ActionService:
         비고:
             이 메서드는 ActionRepo를 사용하여 거래 로그를 데이터베이스에 기록합니다.
         """
-        price = balance * Decimal(self.__DCA)
+        price = (balance * Decimal(self.__DCA)).quantize(Decimal('1'), rounding='ROUND_DOWN')
         amount = self.__action_log_repo.buy_coin(decision.market, decision.current_price, price)
         self.__coin_repo.buy_coin(decision, amount)
         self.__info_repo.minus_balance(1, price)

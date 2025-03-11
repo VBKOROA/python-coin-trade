@@ -12,7 +12,7 @@ class ActionLogRepo:
         market = coin['market']
         amount = coin['amount']
         # 수수료를 고려한 가격
-        price = amount * Decimal(current_price) * self.FEE_RATE 
+        price = (amount * Decimal(current_price) * self.FEE_RATE).quantize(Decimal('1'), rounding='ROUND_DOWN')
         action = 'sell'
         query = """
             INSERT INTO action_log (market, amount, price, action)
