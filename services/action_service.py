@@ -62,8 +62,8 @@ class ActionService:
             placeholder = f"${timeframe}_candle_data"
             if timeframe in timeframes:
                 candles = candle_chart.get_candles(timeframe)
-                yaml_data = self.__candle_service.candle_to_yaml(candles)
-                prompt = prompt.replace(placeholder, yaml_data)
+                json_string = self.__candle_service.candle_to_json(candles)
+                prompt = prompt.replace(placeholder, json_string)
             else:
                 # 요청된 시간대의 데이터가 없는 경우 빈 데이터 표시
                 prompt = prompt.replace(placeholder, "No data available for this timeframe")

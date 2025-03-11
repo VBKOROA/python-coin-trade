@@ -14,13 +14,13 @@
       "stop_loss_price": {
         "type": "integer"
       },
-      "reason": {
+      "think": {
         "type": "string"
       }
     },
     "required": [
       "action",
-      "reason",
+      "think",
       "target_price",
       "stop_loss_price"
     ]

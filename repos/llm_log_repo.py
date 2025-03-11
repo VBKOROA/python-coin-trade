@@ -10,5 +10,5 @@ class LLMLogRepo:
             INSERT INTO llm_log (action, details, price)
             VALUES (%s, %s, %s)
         """
-        self.dbms.cursor.execute(query, (decision.action, decision.reason, decision.current_price))
+        self.dbms.cursor.execute(query, (decision.action, decision.think, decision.current_price))
         self.dbms.conn.commit()

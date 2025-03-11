@@ -1,11 +1,15 @@
+import json
 import yaml
 
 class CandleService:
-    def candle_to_yaml(self, candles: list) -> str:
+    def candle_to_json(self, candles: list) -> str:
         converted_list = []
         for candle in candles:
             converted_list.append(self.__candle_to_json(candle))
-        return yaml.dump(converted_list, allow_unicode=True, default_flow_style=False)
+        ret = json.dumps(converted_list, indent=0)
+        # remove all new lines in ret
+        ret = ret.replace('\n', '')
+        return ret
     
     def __candle_to_json(self, candle: dict) -> dict:
         converted = {
