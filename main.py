@@ -20,13 +20,11 @@ async def main(trade_service: TradeService):
 if __name__ == "__main__":
     try:
         # 싱글톤팩 인스턴스 생성
-        sgtPack = SingletonPack()  
-        asyncio.run(main(sgtPack.trade_service))
+        s_pack = SingletonPack()  
+        asyncio.run(main(s_pack.trade_service))
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
     finally:
         # DB 연결 종료
-        if sgtPack.dbms.conn:
-            sgtPack.dbms.conn.close()
-
-# 15(20) & 5(50) 테스트 요망
+        if s_pack.dbms.conn:
+            s_pack.dbms.conn.close()
