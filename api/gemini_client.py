@@ -21,7 +21,7 @@ class GeminiClient:
             model=self.__LLM_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
-                temperature=1.0,
+                temperature=0.0,
                 response_mime_type="application/json",
                 response_schema=self.__LLM_RESPONSE_SCHEME
             )

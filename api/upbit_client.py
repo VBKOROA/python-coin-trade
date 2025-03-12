@@ -92,8 +92,7 @@ class UpbitClient:
             # 완료된 최고 캔들 제거
             data.pop(-1)
         
-        # 과거 순으로 정렬하여 반환
-        return data[::-1]
+        return data
         
     async def __get_candle_data(self, count: int, timeframe: str, session):
         """
@@ -154,23 +153,7 @@ class UpbitClient:
                                     key=lambda x: self.__get_timeframe_unit(x))
             if results[list(timeframe_config.keys()).index(smallest_timeframe)]:
                 candle_chart.set_current_price(
-                    results[list(timeframe_config.keys()).index(smallest_timeframe)][-1]['trade_price']
+                    results[list(timeframe_config.keys()).index(smallest_timeframe)][0]['trade_price']
                 )
                 
-        return candle_chart
-        
-    # 이전 버전 호환성을 위한 메소드
-    async def fetch_candles_legacy(self) -> CandleChart:
-        """
-        기존 방식과의 호환성을 위한 메소드로, 15분과 1시간 캔들만 가져옵니다.
-        
-        Returns:
-            CandleChart: 15분 및 1시간 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
-        """
-        candle_chart = await self.fetch_candle_chart({'15m': 20, '1h': 5})
-        
-        # 기존 코드와의 호환성을 위해 candles_15m, candles_1h 속성 추가
-        candle_chart.candles_15m = candle_chart.get_candles('15m')
-        candle_chart.candles_1h = candle_chart.get_candles('1h')
-        
         return candle_chart
