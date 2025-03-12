@@ -36,17 +36,6 @@ class ActionService:
         self.__llm_log_repo = llm_log_repo
         
     async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
-        """
-        주어진 시장에 대한 거래 결정을 실행합니다.
-        Args:
-            candle_chart (CandleChart): 캔들 차트 데이터 객체.
-        Returns:
-            Decision: 거래 결정 결과를 포함하는 객체.
-        비고:
-            이 메서드는 비동기적으로 작동하며, 캔들 차트에서 다양한 시간대의 캔들 데이터를 가져와
-            LLM 요청 구조에 삽입하여 최종 거래 결정을 생성합니다.
-        """
-        
         # LLM 요청 구조 복사
         prompt = self.__LLM_REQUEST_SCHEME
         
@@ -83,28 +72,21 @@ class ActionService:
         return decision
     
     def sell_coin(self, coin, current_price):
-        """
-        주어진 코인을 현재 가격으로 판매합니다.
-        Args:
-            coin (dict): 판매할 코인 정보.
-            current_price (float): 현재 시장 가격.
-        비고:
-            이 메서드는 ActionRepo를 사용하여 거래 로그를 데이터베이스에 기록합니다.
-        """
+        # 코인 판매 로직 실행 및 판매 금액 반환
         price = self.__action_log_repo.sell_coin(current_price, coin)
+        # 코인 레포지토리에서 판매된 코인 정보 삭제
         self.__coin_repo.sell_coin(coin['id'])
+        # Info 레포지토리에서 잔액 추가
         self.__info_repo.plus_balance(1, price)
         
-    def buy_coin(self, decision: Decision, balance: Decimal):
-        """
-        주어진 결정에 따라 코인을 구매합니다.
-        Args:
-            decision (Decision): 구매할 코인 정보 및 가격을 포함하는 결정 객체.
-            balance (Decimal): 현재 잔액.
-        비고:
-            이 메서드는 ActionRepo를 사용하여 거래 로그를 데이터베이스에 기록합니다.
-        """
+    def buy_coin(self, decision: Decision):
+        # 현재 잔액을 가져옴
+        balance = Decimal(self.__info_repo.get_balance(1))
+        # DCA 비율에 따라 구매할 금액을 계산 (소수점 이하 버림)
         price = (balance * Decimal(self.__DCA)).quantize(Decimal('1'), rounding='ROUND_DOWN')
+        # 코인 구매 로직 실행 및 구매량 반환
         amount = self.__action_log_repo.buy_coin(decision.market, decision.current_price, price)
+        # 코인 레포지토리에 구매 정보 저장
         self.__coin_repo.buy_coin(decision, amount)
+        # Info 레포지토리에서 잔액 차감
         self.__info_repo.minus_balance(1, price)

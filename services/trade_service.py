@@ -5,13 +5,9 @@ from services.action_service import ActionService
 from pymysql.connections import Connection
 
 class TradeService:
-    def __init__(self):
+    def __init__(self, timeframe_config: dict):
         # 기본 시간대 구성 설정
-        self.__timeframe_config = {
-            '15m': 20,
-            '1h': 5, 
-            '4h': 10
-        }
+        self.__timeframe_config = timeframe_config
     
     def set_upbit_client(self, upbit_client: UpbitClient):
         self.__upbit_client = upbit_client
@@ -22,19 +18,8 @@ class TradeService:
     def set_action_service(self, action_service: ActionService):
         self.__action_service = action_service
         
-    def set_info_repo(self, info_repo: InfoRepo):
-        self.__info_repo = info_repo
-        
     def set_conn(self, conn: Connection):
         self.__conn = conn
-        
-    def set_timeframe_config(self, timeframe_config: dict):
-        """
-        캔들 차트에서 사용할 시간대와 개수를 설정합니다.
-        Args:
-            timeframe_config (dict): {'15m': 20, '1h': 5, '4h': 10} 형식의 시간대별 캔들 개수
-        """
-        self.__timeframe_config = timeframe_config
         
     async def execute_trade_logic(self):
         # 먼저 캔들 차트를 가져온다.
@@ -54,6 +39,5 @@ class TradeService:
         
         # 만약 구매라면
         if(decision.action == 'buy'):
-            balance = self.__info_repo.get_balance(1)
-            self.__action_service.buy_coin(decision, balance)
+            self.__action_service.buy_coin(decision)
             self.__conn.commit()

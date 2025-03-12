@@ -25,27 +25,13 @@ class SingletonPack:
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
         print(f"거래 종목 설정: {self.MARKET}")
-        
         # DCA 비율 설정
         temp = os.environ.get("DCA")
-        if temp is None:
-            self.DCA = 1.0
-        else:
-            self.DCA = int(temp) / 100 # DCA 비율 (ex. 0.01 = 1%)
-            
-        # 시간대 설정 로드 (환경 변수 또는 기본값 사용)
+        self.DCA = int(temp) / 100 # DCA 비율 (ex. 0.01 = 1%)
+        # 시간대 설정
         timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
-        if timeframe_config_str:
-            try:
-                self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
-                print(f"시간대 설정 로드: {self.TIMEFRAME_CONFIG}")
-            except json.JSONDecodeError:
-                print("시간대 설정 파싱 오류, 기본 설정 사용")
-                self.TIMEFRAME_CONFIG = {'15m': 20, '1h': 5, '4h': 10}
-        else:
-            # 기본 시간대 설정
-            self.TIMEFRAME_CONFIG = {'15m': 20, '1h': 5, '4h': 10}
-            print(f"기본 시간대 설정 사용: {self.TIMEFRAME_CONFIG}")
+        self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
+        print(f"시간대 설정: {self.TIMEFRAME_CONFIG}")
 
         # 싱글톤
         self.set_dbms(DBMS(
@@ -65,12 +51,12 @@ class SingletonPack:
             llm_request_scheme=self.LLM_REQUEST_SCHEME,
             dca=self.DCA
         ))
+        self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
         self.set_info_repo(InfoRepo())
         self.set_action_log_repo(ActionLogRepo())
         self.set_llm_log_repo(LLMLogRepo())
         self.set_coin_repo(CoinRepo())
         self.set_candle_service(CandleService())
-        self.set_trade_service(TradeService())
         self.initialize_dependencies()
         
     def initialize_dependencies(self):
@@ -87,10 +73,7 @@ class SingletonPack:
         self.trade_service.set_upbit_client(self.upbit_client)
         self.trade_service.set_coin_repo(self.coin_repo)
         self.trade_service.set_action_service(self.action_service)
-        self.trade_service.set_info_repo(self.info_repo)
         self.trade_service.set_conn(self.dbms.conn)
-        # 시간대 설정 적용
-        self.trade_service.set_timeframe_config(self.TIMEFRAME_CONFIG)
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
