@@ -14,6 +14,44 @@ from repos.action_log_repo import ActionLogRepo
 from repos.llm_log_repo import LLMLogRepo
 
 class SingletonPack:
+    """
+        설정 값들을 담고, 싱글톤 객체들을 초기화 및 관리하는 클래스.
+        환경 변수를 로드하고, 필요한 상수 값들을 설정하며, 각 서비스 객체들을 싱글톤으로 관리하여
+        전역적으로 접근할 수 있도록 한다. DBMS, GeminiClient, UpbitClient, ActionService,
+        TradeService, InfoRepo, ActionLogRepo, LLMLogRepo, CoinRepo, CandleService 등의 객체를 생성하고,
+        각 객체 간의 의존성을 설정하여 전체 시스템을 구성한다.
+        Attributes:
+            LLM_API_KEY (str): LLM API 키. 환경 변수에서 로드.
+            LLM_REQUEST_SCHEME (str): LLM 요청 구조. 파일에서 읽어옴.
+            LLM_RESPONSE_SCHEME (str): LLM 응답 구조. 파일에서 읽어옴.
+            LLM_MODEL (str): LLM 모델 이름. 환경 변수에서 로드.
+            MARKET (str): 거래소 마켓. 환경 변수에서 로드. (ex. KRW-BTC)
+            DCA (float): DCA 비율. 환경 변수에서 로드하여 퍼센트(%)로 변환. (ex. 0.01 = 1%)
+            TIMEFRAME_CONFIG (dict): 시간대 설정. 환경 변수에서 JSON 형태로 로드.
+            dbms (DBMS): 데이터베이스 관리 시스템 객체.
+            gemini_client (GeminiClient): Gemini API 클라이언트 객체.
+            upbit_client (UpbitClient): Upbit API 클라이언트 객체.
+            action_service (ActionService): 액션 서비스 객체.
+            trade_service (TradeService): 거래 서비스 객체.
+            info_repo (InfoRepo): 정보 저장소 객체.
+            action_log_repo (ActionLogRepo): 액션 로그 저장소 객체.
+            llm_log_repo (LLMLogRepo): LLM 로그 저장소 객체.
+            coin_repo (CoinRepo): 코인 저장소 객체.
+            candle_service (CandleService): 캔들 서비스 객체.
+        Methods:
+            initialize_dependencies(): 객체 간의 의존성을 초기화한다. 각 서비스 객체에 필요한 저장소 및 클라이언트를 설정한다.
+            set_action_service(action_service: ActionService): ActionService 객체를 설정한다.
+            set_dbms(dbms: DBMS): DBMS 객체를 설정한다.
+            set_candle_service(candle_service: CandleService): CandleService 객체를 설정한다.
+            set_info_repo(info_repo: InfoRepo): InfoRepo 객체를 설정한다.
+            set_gemini_client(gemini_client: GeminiClient): GeminiClient 객체를 설정한다.
+            set_upbit_client(upbit_client: UpbitClient): UpbitClient 객체를 설정한다.
+            set_trade_service(trade_service: TradeService): TradeService 객체를 설정한다.
+            set_coin_repo(coin_repo: CoinRepo): CoinRepo 객체를 설정한다.
+            set_action_log_repo(action_log_repo: ActionLogRepo): ActionLogRepo 객체를 설정한다.
+            set_llm_log_repo(llm_log_repo: LLMLogRepo): LLMLogRepo 객체를 설정한다.
+    """
+    
     def __init__(self):
         # 환경변수 로드
         load_dotenv()
