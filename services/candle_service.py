@@ -7,7 +7,6 @@ class CandleService:
         for candle in candles:
             converted_list.append(self.__candle_to_json(candle))
         ret = json.dumps(converted_list, indent=0)
-        # remove all new lines in ret
         ret = ret.replace('\n', '')
         return ret
     
