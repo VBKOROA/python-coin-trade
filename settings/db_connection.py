@@ -8,10 +8,10 @@ class DBMS:
     def __init__(self, host, port, user, password, name):
         # SQLAlchemy 엔진 생성
         connection_string = f"mysql+pymysql://{user}:{password}@{host}:{port}/{name}"
-        self.engine = create_engine(connection_string, echo=False)
+        self.__engine = create_engine(connection_string, echo=False)
         
         # 세션 팩토리 생성
-        self.session_factory = sessionmaker(bind=self.engine)
+        self.session_factory = sessionmaker(bind=self.__engine)
         self.Session = scoped_session(self.session_factory)
         
     def get_session(self):
@@ -19,7 +19,7 @@ class DBMS:
     
     def create_all(self):
         """모든 모델 테이블을 생성합니다"""
-        Base.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.__engine)
     
     def close_all(self):
         """모든 세션을 종료합니다"""

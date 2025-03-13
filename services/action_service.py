@@ -3,8 +3,8 @@ from decimal import Decimal
 import json
 import re
 
-from models.decision import Decision
-from models.candle_chart import CandleChart
+from models.dto.decision import Decision
+from models.dto.candle_chart import CandleChart
 from api.gemini_client import GeminiClient
 from services.candle_service import CandleService
 

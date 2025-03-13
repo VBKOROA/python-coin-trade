@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 
 from datetime import datetime, timedelta
-from models.candle_chart import CandleChart
+from models.dto.candle_chart import CandleChart
 
 class UpbitClient:
     def __init__(self, market: str):
