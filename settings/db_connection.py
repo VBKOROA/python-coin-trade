@@ -1,4 +1,7 @@
 import pymysql
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class DBMS:
     def __init__(self, host, port, user, password, name):
