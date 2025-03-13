@@ -1,6 +1,4 @@
 from api.upbit_client import UpbitClient
-from repos.coin_repo import CoinRepo
-from repos.info_repo import InfoRepo
 from services.action_service import ActionService
 from pymysql.connections import Connection
 
@@ -11,9 +9,6 @@ class TradeService:
     
     def set_upbit_client(self, upbit_client: UpbitClient):
         self.__upbit_client = upbit_client
-        
-    def set_coin_repo(self, coin_repo: CoinRepo):
-        self.__coin_repo = coin_repo
     
     def set_action_service(self, action_service: ActionService):
         self.__action_service = action_service

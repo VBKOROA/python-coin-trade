@@ -1,5 +1,4 @@
 import json
-import yaml
 
 class CandleService:
     def candle_to_json(self, candles: list) -> str:

@@ -4,13 +4,9 @@ import json
 import re
 
 from models.decision import Decision
-from repos.coin_repo import CoinRepo
-from repos.info_repo import InfoRepo
-from repos.llm_log_repo import LLMLogRepo
 from models.candle_chart import CandleChart
 from api.gemini_client import GeminiClient
 from services.candle_service import CandleService
-from repos.action_log_repo import ActionLogRepo
 
 class ActionService:
     def __init__(self, llm_request_scheme: str, dca: float):
@@ -22,18 +18,6 @@ class ActionService:
         
     def set_candle_service(self, candle_service: CandleService):
         self.__candle_service = candle_service
-        
-    def set_action_log_repo(self, action_log_repo: ActionLogRepo):
-        self.__action_log_repo = action_log_repo
-        
-    def set_coin_repo(self, coin_repo: CoinRepo):
-        self.__coin_repo = coin_repo
-        
-    def set_info_repo(self, info_repo: InfoRepo):
-        self.__info_repo = info_repo
-        
-    def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
-        self.__llm_log_repo = llm_log_repo
         
     async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
         """

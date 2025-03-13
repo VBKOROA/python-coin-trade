@@ -26,5 +26,5 @@ if __name__ == "__main__":
         print("프로그램이 종료되었습니다.")
     finally:
         # DB 연결 종료
-        if s_pack.dbms.conn:
-            s_pack.dbms.conn.close()
+        if s_pack.dbms:
+            s_pack.dbms.close_all()
