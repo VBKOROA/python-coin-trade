@@ -16,8 +16,7 @@ class UpbitClient:
             '15m': 15,
             '30m': 30,
             '1h': 60,
-            '4h': 240,
-            '1d': 1440,  # 하루는 1440분
+            '4h': 240
         }
         # 기본 설정: 캔들 개수
         self.__DEFAULT_CANDLE_COUNTS = {
