@@ -1,6 +1,6 @@
 from api.upbit_client import UpbitClient
 from services.action_service import ActionService
-from pymysql.connections import Connection
+from sqlalchemy.orm import scoped_session
 
 class TradeService:
     def __init__(self, timeframe_config: dict):
@@ -13,8 +13,8 @@ class TradeService:
     def set_action_service(self, action_service: ActionService):
         self.__action_service = action_service
         
-    def set_conn(self, conn: Connection):
-        self.__conn = conn
+    def set_conn(self, session: scoped_session):
+        self.__session = session
         
     async def execute_trade_logic(self):
         """
@@ -33,7 +33,7 @@ class TradeService:
         if coins_should_sell:
             for coin in coins_should_sell:
                 self.__action_service.sell_coin(coin, candle_chart.current_price)
-            self.__conn.commit()
+            self.__session.commit()
         
         # AI한테 결정을 요청한다.
         decision = await self.__action_service.execute_trade_decision(candle_chart)
@@ -41,4 +41,4 @@ class TradeService:
         # 만약 구매라면
         if(decision.action == 'buy'):
             self.__action_service.buy_coin(decision)
-            self.__conn.commit()
+            self.__session.commit()

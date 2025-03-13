@@ -4,14 +4,10 @@ import json
 from dotenv import load_dotenv
 from api.gemini_client import GeminiClient
 from api.upbit_client import UpbitClient
-from repos.info_repo import InfoRepo
 from services.action_service import ActionService
 from services.candle_service import CandleService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
-from repos.coin_repo import CoinRepo
-from repos.action_log_repo import ActionLogRepo
-from repos.llm_log_repo import LLMLogRepo
 
 class SingletonPack:
     """
@@ -33,23 +29,15 @@ class SingletonPack:
             upbit_client (UpbitClient): Upbit API 클라이언트 객체.
             action_service (ActionService): 액션 서비스 객체.
             trade_service (TradeService): 거래 서비스 객체.
-            info_repo (InfoRepo): 정보 저장소 객체.
-            action_log_repo (ActionLogRepo): 액션 로그 저장소 객체.
-            llm_log_repo (LLMLogRepo): LLM 로그 저장소 객체.
-            coin_repo (CoinRepo): 코인 저장소 객체.
             candle_service (CandleService): 캔들 서비스 객체.
         Methods:
             initialize_dependencies(): 객체 간의 의존성을 초기화한다. 각 서비스 객체에 필요한 저장소 및 클라이언트를 설정한다.
             set_action_service(action_service: ActionService): ActionService 객체를 설정한다.
             set_dbms(dbms: DBMS): DBMS 객체를 설정한다.
             set_candle_service(candle_service: CandleService): CandleService 객체를 설정한다.
-            set_info_repo(info_repo: InfoRepo): InfoRepo 객체를 설정한다.
             set_gemini_client(gemini_client: GeminiClient): GeminiClient 객체를 설정한다.
             set_upbit_client(upbit_client: UpbitClient): UpbitClient 객체를 설정한다.
             set_trade_service(trade_service: TradeService): TradeService 객체를 설정한다.
-            set_coin_repo(coin_repo: CoinRepo): CoinRepo 객체를 설정한다.
-            set_action_log_repo(action_log_repo: ActionLogRepo): ActionLogRepo 객체를 설정한다.
-            set_llm_log_repo(llm_log_repo: LLMLogRepo): LLMLogRepo 객체를 설정한다.
     """
     
     def __init__(self):
@@ -90,28 +78,15 @@ class SingletonPack:
             dca=self.DCA
         ))
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
-        self.set_info_repo(InfoRepo())
-        self.set_action_log_repo(ActionLogRepo())
-        self.set_llm_log_repo(LLMLogRepo())
-        self.set_coin_repo(CoinRepo())
         self.set_candle_service(CandleService())
         self.initialize_dependencies()
         
     def initialize_dependencies(self):
-        self.info_repo.set_dbms(self.dbms)
-        self.action_log_repo.set_dbms(self.dbms)
-        self.llm_log_repo.set_dbms(self.dbms)
-        self.coin_repo.set_dbms(self.dbms)
-        self.action_service.set_action_log_repo(self.action_log_repo)
         self.action_service.set_candle_service(self.candle_service)
-        self.action_service.set_coin_repo(self.coin_repo)
-        self.action_service.set_info_repo(self.info_repo)
-        self.action_service.set_llm_log_repo(self.llm_log_repo)
         self.action_service.set_gemini_client(self.gemini_client)
         self.trade_service.set_upbit_client(self.upbit_client)
-        self.trade_service.set_coin_repo(self.coin_repo)
         self.trade_service.set_action_service(self.action_service)
-        self.trade_service.set_conn(self.dbms.conn)
+        self.trade_service.set_conn(self.dbms.get_session())
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
@@ -122,9 +97,6 @@ class SingletonPack:
     def set_candle_service(self, candle_service: CandleService):
         self.candle_service = candle_service
         
-    def set_info_repo(self, info_repo: InfoRepo):
-        self.info_repo = info_repo
-        
     def set_gemini_client(self, gemini_client: GeminiClient):
         self.gemini_client = gemini_client
         
@@ -133,12 +105,3 @@ class SingletonPack:
         
     def set_trade_service(self, trade_service: TradeService):
         self.trade_service = trade_service
-        
-    def set_coin_repo(self, coin_repo: CoinRepo):
-        self.coin_repo = coin_repo
-        
-    def set_action_log_repo(self, action_log_repo: ActionLogRepo):
-        self.action_log_repo = action_log_repo
-        
-    def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
-        self.llm_log_repo = llm_log_repo
