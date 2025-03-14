@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -13,9 +14,19 @@ class DBMS:
         # 세션 팩토리 생성
         self.session_factory = sessionmaker(bind=self.__engine)
         self.Session = scoped_session(self.session_factory)
-        
+    
+    @contextmanager
     def get_session(self):
-        return self.Session()
+        """세션을 제공하고 완료 시 자동으로 닫는 컨텍스트 매니저"""
+        session = self.Session()
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
     
     def setup(self):
         """
