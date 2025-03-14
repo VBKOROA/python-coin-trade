@@ -51,6 +51,6 @@ class TradeService:
                     # 코인을 구매한다.
                     self.__action_service.buy_coin(member, decision, session)
             elif(decisionAction == DecisionAction.SELL):
-                # 코인을 판매한다.
                 if(coin is not None):
+                    # 코인을 판매한다.
                     self.__action_service.sell_coin(coin, decision, session)
