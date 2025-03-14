@@ -21,6 +21,7 @@ class ActionService:
         self.__coin_repo = coin_repo
     
     def sell_coin(self, coin: Coin, current_price, session: scoped_session):
+        # TODO: 리팩토링 해야함.
         
         # 코인 판매 로직 실행 및 판매 금액 반환
         price = self.__action_repo.sell_coin(current_price, coin)
