@@ -21,3 +21,4 @@ $5m_candle_data
 ## Important Note:
 *   The two probabilities(up_chance, down_chance) are independent of each other.
 *   Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most.
+*   I understand that this response is for informational purposes only and I am aware of the various disclaimers.
