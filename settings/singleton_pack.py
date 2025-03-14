@@ -93,6 +93,7 @@ class SingletonPack:
     
     def set_dbms(self, dbms: DBMS):
         self.dbms = dbms
+        self.dbms.setup()
         
     def set_candle_service(self, candle_service: CandleService):
         self.candle_service = candle_service

@@ -17,10 +17,13 @@ class DBMS:
     def get_session(self):
         return self.Session()
     
-    def create_all(self):
-        """모든 모델 테이블을 생성합니다"""
+    def setup(self):
+        """
+        데이터베이스 스키마를 초기화합니다.
+        이 메서드는 기존의 모든 테이블을 삭제하고 Base 메타데이터를 기반으로 새 테이블을 생성합니다.
+        """
+        Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
     
     def close_all(self):
-        """모든 세션을 종료합니다"""
         self.Session.remove()
