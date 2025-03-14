@@ -4,7 +4,10 @@ import json
 from dotenv import load_dotenv
 from api.gemini_client import GeminiClient
 from api.upbit_client import UpbitClient
+from repos.action_repo import ActionRepo
+from repos.coin_repo import CoinRepo
 from repos.llm_log_repo import LLMLogRepo
+from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from services.candle_service import CandleService
 from services.decision_service import DecisionService
@@ -81,10 +84,7 @@ class SingletonPack:
             llm_response_scheme=self.LLM_RESPONSE_SCHEME
         ))
         self.set_upbit_client(UpbitClient(self.MARKET))
-        self.set_action_service(ActionService(
-            llm_request_scheme=self.LLM_REQUEST_SCHEME,
-            dca=self.DCA
-        ))
+        self.set_action_service(ActionService(self.DCA))
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
         self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME))
         self.set_decision_service(DecisionService(
@@ -94,18 +94,24 @@ class SingletonPack:
         ))
         self.set_candle_service(CandleService())
         self.set_llm_log_repo(LLMLogRepo())
+        self.set_member_repo(MemberRepo())
+        self.set_action_repo(ActionRepo())
+        self.set_coin_repo(CoinRepo())
         self.initialize_dependencies()
         
     def initialize_dependencies(self):
         self.trade_service.set_upbit_client(self.upbit_client)
         self.trade_service.set_action_service(self.action_service)
-        self.trade_service.set_conn(self.dbms.get_session())
+        self.trade_service.set_dbms(self.dbms)
+        self.trade_service.set_member_repo(self.member_repo)
         self.trade_service.set_llm_service(self.llm_service)
         self.trade_service.set_decision_service(self.decision_service)
         self.llm_service.set_gemini_client(self.gemini_client)
         self.llm_service.set_candle_service(self.candle_service)
         self.llm_service.set_llm_log_repo(self.llm_log_repo)
         self.llm_service.set_dbms(self.dbms)
+        self.action_service.set_action_repo(self.action_repo)
+        self.action_service.set_coin_repo(self.coin_repo)
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
@@ -134,3 +140,12 @@ class SingletonPack:
         
     def set_decision_service(self, decision_service: DecisionService):
         self.decision_service = decision_service
+        
+    def set_member_repo(self, member_repo: MemberRepo):
+        self.member_repo = member_repo
+        
+    def set_action_repo(self, action_repo: ActionRepo):
+        self.action_repo = action_repo
+        
+    def set_coin_repo(self, coin_repo: CoinRepo):
+        self.coin_repo = coin_repo
