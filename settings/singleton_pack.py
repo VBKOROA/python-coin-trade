@@ -14,7 +14,7 @@ class SingletonPack:
         설정 값들을 담고, 싱글톤 객체들을 초기화 및 관리하는 클래스.
         환경 변수를 로드하고, 필요한 상수 값들을 설정하며, 각 서비스 객체들을 싱글톤으로 관리하여
         전역적으로 접근할 수 있도록 한다. DBMS, GeminiClient, UpbitClient, ActionService,
-        TradeService, InfoRepo, ActionLogRepo, LLMLogRepo, CoinRepo, CandleService 등의 객체를 생성하고,
+        TradeService, CandleService 등의 객체를 생성하고,
         각 객체 간의 의존성을 설정하여 전체 시스템을 구성한다.
         Attributes:
             LLM_API_KEY (str): LLM API 키. 환경 변수에서 로드.
