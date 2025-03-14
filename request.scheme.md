@@ -1,6 +1,6 @@
 # Chart Analysis Request
 
-**Request:** Analyze the recent candlestick data to predict whether the next candle will be bearish (down) or bullish (up). 
+**Request:** Analyze the recent candlestick data to predict whether the overall future trend will be upward or downward.
 
 ## Input
 
@@ -12,8 +12,8 @@ $5m_candle_data
 ## Output
 ```json
 {
-    "up_chance": "Probability of the next candle being bullish (up). Expressed as an integer from 0 to 100.",
-    "down_chance": "Probability of the next candle being bearish (down). Expressed as an integer from 0 to 100.",
+    "up_chance": "Probability of future upward trend. Expressed as an integer from 0 to 100.",
+    "down_chance": "Probability of future downward trend. Expressed as an integer from 0 to 100.",
     "details": "Briefly describe the analysis and reasoning process."
 }
 ```
