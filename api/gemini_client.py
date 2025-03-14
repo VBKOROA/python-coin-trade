@@ -16,7 +16,7 @@ class GeminiClient:
         Returns:
             str: LLM이 생성한 응답 텍스트.
         """
-        print(prompt)
+        # print(prompt)
         response = self.__client.models.generate_content(
             model=self.__llm_model,
             contents=prompt,
