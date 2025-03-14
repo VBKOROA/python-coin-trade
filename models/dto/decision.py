@@ -4,7 +4,7 @@ class Decision:
         self.down_chance = decision["down_chance"]
         self.details = decision["details"]
         
-    def set_current_price(self, current_price: float):
+    def set_current_price(self, current_price: int):
         self.current_price = current_price
         
     def set_market(self, market: str):
