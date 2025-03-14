@@ -20,18 +20,21 @@ class ActionService:
     def set_coin_repo(self, coin_repo: CoinRepo):
         self.__coin_repo = coin_repo
     
-    def sell_coin(self, coin: Coin, current_price, session: scoped_session):
-        # TODO: 리팩토링 해야함.
-        
+    def sell_coin(self, coin: Coin, decision: Decision, session: scoped_session):
         # 코인 판매 로직 실행 및 판매 금액 반환
-        price = self.__action_repo.sell_coin(current_price, coin)
+        price = self.__action_repo.sell_coin(
+            coin = coin,
+            decision = decision,
+            session = session
+        )
         # 코인 레포지토리에서 판매된 코인 정보 삭제
-        self.__coin_repo.sell_coin(coin['id'])
-        # Info 레포지토리에서 잔액 추가
-        self.__info_repo.plus_balance(1, price)
+        session.delete(coin)
+        # 잔액 업데이트
+        member: Member = coin.member
+        member.plus_balance(price)
+        session.add(member)
         
     def buy_coin(self, member: Member, decision: Decision, session: scoped_session):
-        
         # 현재 잔액을 가져옴
         balance = Decimal(member.balance)
         # DCA 비율에 따라 구매할 금액을 계산 (소수점 이하를 버림하여 정수로 변환)
@@ -45,6 +48,6 @@ class ActionService:
         )
         # 코인 레포지토리에 구매 정보 저장
         self.__coin_repo.buy_coin(decision, amount)
-        # 멤버의 잔액을 차감
+        # 잔액 업데이트
         member.minus_balance(total_price)
         session.add(member)
