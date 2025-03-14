@@ -33,15 +33,15 @@ class DBMS:
         데이터베이스 스키마를 초기화합니다.
         이 메서드는 기존의 모든 테이블을 삭제하고 Base 메타데이터를 기반으로 새 테이블을 생성합니다.
         """
-        Base.metadata.drop_all(self.__engine)
+        # Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
         
         # Create initial test member
-        from models.db.member import Member
+        # from models.db.member import Member
         
-        with self.get_session() as session:
-            test_member = Member(name="test", balance=100000000)
-            session.add(test_member)
+        # with self.get_session() as session:
+        #     test_member = Member(name="test", balance=100000000)
+        #     session.add(test_member)
     
     def close_all(self):
         self.Session.remove()

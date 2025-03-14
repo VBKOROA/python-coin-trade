@@ -27,7 +27,6 @@ class ActionRepo:
     def sell_coin(self, coin: Coin, decision: Decision, session: scoped_session) -> int:
         member: Member = coin.member
         price = Decimal(decision.current_price) * Decimal(coin.amount) * Decimal(self.__fee) // 1
-        member.plus_balance(price)
         action = Action(
             action = ActionType.SELL,
             market = decision.market,
@@ -37,5 +36,4 @@ class ActionRepo:
             member = member
         )
         session.add(action)
-        session.add(member)
         return price
