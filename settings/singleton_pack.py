@@ -7,6 +7,7 @@ from api.upbit_client import UpbitClient
 from repos.llm_log_repo import LLMLogRepo
 from services.action_service import ActionService
 from services.candle_service import CandleService
+from services.decision_service import DecisionService
 from services.llm_service import LLMService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
@@ -86,6 +87,11 @@ class SingletonPack:
         ))
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
         self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME))
+        self.set_decision_service(DecisionService(
+            chance_reliability=self.CHANCE_RELIABILITY,
+            buy_at_up_chance_above=self.BUY_AT_UP_CHANCE_ABOVE,
+            sell_at_down_chance_above=self.SELL_AT_DOWN_CHANCE_ABOVE
+        ))
         self.set_candle_service(CandleService())
         self.set_llm_log_repo(LLMLogRepo())
         self.initialize_dependencies()
@@ -95,10 +101,11 @@ class SingletonPack:
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_conn(self.dbms.get_session())
         self.trade_service.set_llm_service(self.llm_service)
+        self.trade_service.set_decision_service(self.decision_service)
         self.llm_service.set_gemini_client(self.gemini_client)
         self.llm_service.set_candle_service(self.candle_service)
         self.llm_service.set_llm_log_repo(self.llm_log_repo)
-        self.llm_log_repo.set_session(self.dbms.get_session())
+        self.llm_service.set_dbms(self.dbms)
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
@@ -124,3 +131,6 @@ class SingletonPack:
         
     def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
         self.llm_log_repo = llm_log_repo
+        
+    def set_decision_service(self, decision_service: DecisionService):
+        self.decision_service = decision_service
