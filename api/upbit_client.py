@@ -6,9 +6,9 @@ from models.dto.candle_chart import CandleChart
 
 class UpbitClient:
     def __init__(self, market: str):
-        self.__MARKET = market
+        self.__market = market
         # 지원하는 시간대와 각 시간대별 분 단위 매핑
-        self.__TIMEFRAME_UNITS = {
+        self.__timeframe_unit = {
             '1m': 1,
             '3m': 3,
             '5m': 5,
@@ -17,11 +17,6 @@ class UpbitClient:
             '30m': 30,
             '1h': 60,
             '4h': 240
-        }
-        # 기본 설정: 캔들 개수
-        self.__DEFAULT_CANDLE_COUNTS = {
-            '15m': 20,
-            '1h': 5,
         }
         
     async def __req_data(self, unit: int, params: dict, session):
@@ -43,7 +38,7 @@ class UpbitClient:
         Raises:
             ValueError: 지원하지 않는 시간대가 주어졌을 때 발생.
         """
-        unit = self.__TIMEFRAME_UNITS.get(timeframe)
+        unit = self.__timeframe_unit.get(timeframe)
         if not unit:
             raise ValueError(f"지원하지 않는 시간대입니다: {timeframe}")
         return unit
@@ -106,7 +101,7 @@ class UpbitClient:
         unit = self.__get_timeframe_unit(timeframe)
         
         params = {
-            'market': self.__MARKET,
+            'market': self.__market,
             'count': count + 1,  # 진행 중인 캔들을 고려해 하나 더 요청
         }
         
@@ -126,11 +121,7 @@ class UpbitClient:
             CandleChart: 요청한 시간대의 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
         """
         candle_chart = CandleChart()
-        candle_chart.set_market(self.__MARKET)
-        
-        # 기본 설정 사용 또는 사용자 정의 설정 적용
-        if not timeframe_config:
-            timeframe_config = self.__DEFAULT_CANDLE_COUNTS
+        candle_chart.set_market(self.__market)
             
         async with aiohttp.ClientSession() as session:
             tasks = []

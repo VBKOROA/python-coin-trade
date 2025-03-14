@@ -10,8 +10,8 @@ from services.candle_service import CandleService
 
 class ActionService:
     def __init__(self, llm_request_scheme: str, dca: float):
-        self.__LLM_REQUEST_SCHEME = llm_request_scheme
-        self.__DCA = dca
+        self._llm_request_scheme = llm_request_scheme
+        self.__dca = dca
         
     def set_gemini_client(self, gemini_client: GeminiClient):
         self.__gemini_client = gemini_client
@@ -32,7 +32,7 @@ class ActionService:
         """
         
         # LLM 요청 구조 복사
-        prompt = self.__LLM_REQUEST_SCHEME
+        prompt = self._llm_request_scheme
         
         # 모든 시간대의 캔들 데이터를 LLM 요청 구조에 삽입
         timeframes = candle_chart.get_all_timeframes()
@@ -102,7 +102,7 @@ class ActionService:
         # 현재 잔액을 가져옴
         balance = Decimal(self.__info_repo.get_balance(1))
         # DCA 비율에 따라 구매할 금액을 계산 (소수점 이하 버림)
-        price = (balance * Decimal(self.__DCA)).quantize(Decimal('1'), rounding='ROUND_DOWN')
+        price = (balance * Decimal(self.__dca)).quantize(Decimal('1'), rounding='ROUND_DOWN')
         # 코인 구매 로직 실행 및 구매량 반환
         amount = self.__action_log_repo.buy_coin(decision.market, decision.current_price, price)
         # 코인 레포지토리에 구매 정보 저장

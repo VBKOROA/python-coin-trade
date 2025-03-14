@@ -1,27 +1,19 @@
 {
-    "type": "object",
-    "properties": {
-      "action": {
-        "type": "string",
-        "enum": [
-          "buy",
-          "wait"
-        ]
-      },
-      "target_price": {
-        "type": "integer"
-      },
-      "stop_loss_price": {
-        "type": "integer"
-      },
-      "think": {
-        "type": "string"
-      }
+  "type": "object",
+  "properties": {
+    "up_chance": {
+      "type": "number"
     },
-    "required": [
-      "action",
-      "think",
-      "target_price",
-      "stop_loss_price"
-    ]
-  }
+    "down_chance": {
+      "type": "number"
+    },
+    "details": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "up_chance",
+    "down_chance",
+    "details"
+  ]
+}

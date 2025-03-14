@@ -51,9 +51,11 @@ class SingletonPack:
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
         print(f"거래 종목 설정: {self.MARKET}")
+        
         # DCA 비율 설정
         temp = os.environ.get("DCA")
         self.DCA = int(temp) / 100 # DCA 비율 (ex. 0.01 = 1%)
+        
         # 시간대 설정
         timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
         self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
