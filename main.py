@@ -1,5 +1,3 @@
-# install requests
-# python -m pip install requests
 import asyncio
 import datetime
 
