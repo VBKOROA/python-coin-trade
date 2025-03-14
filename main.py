@@ -13,14 +13,14 @@ async def main(trade_service: TradeService):
         # 아니면 continue
         now = datetime.datetime.now()
         if now.second == 0 and now.minute % 5 == 0:
-            await trade_service.execute_trade_logic()
+            await trade_service.execute_trade_logic(1)
         else:
             await asyncio.sleep(1)
 
 if __name__ == "__main__":
-    try:
-        # 싱글톤팩 인스턴스 생성
-        s_pack = SingletonPack()  
+    # 싱글톤팩 인스턴스 생성
+    s_pack = SingletonPack()  
+    try:    
         asyncio.run(main(s_pack.trade_service))
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
