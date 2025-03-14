@@ -4,10 +4,7 @@ from models.db.llm_log import LLMLog
 from models.dto.decision import Decision
 
 class LLMLogRepo:
-    def set_session(self, session: scoped_session):
-        self.__session = session
-        
-    def log_decision(self, decision: Decision):
+    def log_decision(self, decision: Decision, session: scoped_session):
         llm_log = LLMLog(
             up_chance = decision.up_chance,
             down_chance = decision.down_chance,
@@ -15,5 +12,5 @@ class LLMLogRepo:
             market = decision.market,
             details = decision.details
         )
-        self.__session.add(llm_log)
-        self.__session.commit()
+        session.add(llm_log)
+        session.commit()
