@@ -3,6 +3,8 @@ from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from sqlalchemy.orm import scoped_session
 
+from services.llm_service import LLMService
+
 class TradeService:
     def __init__(self, timeframe_config: dict):
         # 기본 시간대 구성 설정
@@ -13,6 +15,9 @@ class TradeService:
     
     def set_action_service(self, action_service: ActionService):
         self.__action_service = action_service
+        
+    def set_llm_service(self, llm_service: LLMService):
+        self.__llm_service = llm_service
         
     def set_conn(self, session: scoped_session):
         self.__session = session
@@ -31,7 +36,7 @@ class TradeService:
         candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
         
         # AI한테 결정을 요청한다.
-        decision = await self.__action_service.execute_trade_decision(candle_chart)
+        decision = await self.__llm_service.execute_trade_decision(candle_chart)
         
         # 현재 내가 가지고 있는 코인을 가져온다.
         member = self.__member_repo.get_member_by_id(member_id)

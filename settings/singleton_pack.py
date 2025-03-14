@@ -52,6 +52,9 @@ class SingletonPack:
         self.LLM_RESPONSE_SCHEME = open("response.scheme.json", "r").read() # LLM 응답 구조
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
+        self.CHANCE_RELIABILITY = os.environ.get("CHANCE_RELIABILITY") # 확률 신뢰도
+        self.BUY_AT_UP_CHANCE_ABOVE = os.environ.get("BUY_AT_UP_CHANCE_ABOVE") # 매수할 상승 확률
+        self.SELL_AT_DOWN_CHANCE_ABOVE = os.environ.get("SELL_AT_DOWN_CHANCE_ABOVE") # 매도할 하락 확률
         print(f"거래 종목 설정: {self.MARKET}")
         
         # DCA 비율 설정
@@ -91,6 +94,7 @@ class SingletonPack:
         self.trade_service.set_upbit_client(self.upbit_client)
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_conn(self.dbms.get_session())
+        self.trade_service.set_llm_service(self.llm_service)
         self.llm_service.set_gemini_client(self.gemini_client)
         self.llm_service.set_candle_service(self.candle_service)
         self.llm_service.set_llm_log_repo(self.llm_log_repo)
