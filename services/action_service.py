@@ -47,7 +47,12 @@ class ActionService:
             session = session
         )
         # 코인 레포지토리에 구매 정보 저장
-        self.__coin_repo.buy_coin(decision, amount)
+        self.__coin_repo.buy_coin(
+            member=member,
+            decision=decision,
+            amount=amount,
+            session=session
+        )
         # 잔액 업데이트
         member.minus_balance(total_price)
         session.add(member)

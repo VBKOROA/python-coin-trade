@@ -32,19 +32,20 @@ class TradeService:
         self.__dbms = dbms
         
     async def execute_trade_logic(self, member_id: int):
-        # 먼저 캔들 차트를 가져온다.
-        candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
-        
-        # AI한테 결정을 요청한다.
-        decision = await self.__llm_service.execute_trade_decision(candle_chart)
-        
-        # 현재 내가 가지고 있는 코인을 가져온다.
-        member = self.__member_repo.get_member_by_id(member_id)
-        coin: Coin = member.coin
-        
-        # 최종 결정을 계산한다.
-        decisionAction = self.__decision_service.decide_action(decision, member)
         with self.__dbms.get_session() as session:
+            # 먼저 캔들 차트를 가져온다.
+            candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
+            
+            # AI한테 결정을 요청한다.
+            decision = await self.__llm_service.execute_trade_decision(candle_chart)
+            
+            # 현재 내가 가지고 있는 코인을 가져온다.
+            member = self.__member_repo.get_member_by_id(member_id, session)
+            coin: Coin = member.coin
+            
+            # 최종 결정을 계산한다.
+            decisionAction = self.__decision_service.decide_action(decision)
+        
             if(decisionAction == DecisionAction.BUY):
                 # 코인을 구매한다.
                 self.__action_service.buy_coin(member, decision, session)
