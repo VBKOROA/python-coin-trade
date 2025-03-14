@@ -26,15 +26,6 @@ class TradeService:
         # 먼저 캔들 차트를 가져온다.
         candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
         
-        # 현재 팔아야 할 코인을 전부 조회한다.
-        coins_should_sell = self.__coin_repo.get_coins_should_sell(candle_chart.current_price)
-        
-        # 만약 팔아야 할 코인이 있다면 판다.
-        if coins_should_sell:
-            for coin in coins_should_sell:
-                self.__action_service.sell_coin(coin, candle_chart.current_price)
-            self.__session.commit()
-        
         # AI한테 결정을 요청한다.
         decision = await self.__action_service.execute_trade_decision(candle_chart)
         
