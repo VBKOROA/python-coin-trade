@@ -31,3 +31,4 @@ class DecisionService:
                 # down_chance가 sell_at_down_chance_above보다 크면 sell
                 return DecisionAction.SELL
         
+        return DecisionAction.WAIT
