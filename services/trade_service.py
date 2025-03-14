@@ -1,4 +1,5 @@
 from api.upbit_client import UpbitClient
+from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from sqlalchemy.orm import scoped_session
 
@@ -16,7 +17,10 @@ class TradeService:
     def set_conn(self, session: scoped_session):
         self.__session = session
         
-    async def execute_trade_logic(self):
+    def set_member_repo(self, member_repo: MemberRepo):
+        self.__member_repo = member_repo
+        
+    async def execute_trade_logic(self, member_id: int):
         """
         자동 매매 로직을 실행하는 메서드.
         캔들 차트를 가져오고, 팔아야 할 코인이 있는지 확인하여 판매한다.
@@ -28,6 +32,9 @@ class TradeService:
         
         # AI한테 결정을 요청한다.
         decision = await self.__action_service.execute_trade_decision(candle_chart)
+        
+        # 현재 내가 가지고 있는 코인을 가져온다.
+        member = self.__member_repo.get_member_by_id(member_id)
         
         # 만약 구매라면
         if(decision.action == 'buy'):

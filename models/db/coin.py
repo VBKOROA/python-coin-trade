@@ -5,7 +5,7 @@ from settings.db_connection import Base
 class Coin(Base):
     __tablename__ = "coin"
     
-    id = Column(Integer, primary_key=True) # 기본키
+    id = Column(Integer, primary_key=True, autoincrement=True) # 기본키
     market = Column(String(20), nullable=False) # 거래소 마켓
     amount = Column(Numeric(precision=20, scale=8), nullable=False) # 구매 수량
     entry_price = Column(Integer, nullable=False) # 구매 시점 가격

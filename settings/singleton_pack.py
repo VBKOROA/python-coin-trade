@@ -4,8 +4,10 @@ import json
 from dotenv import load_dotenv
 from api.gemini_client import GeminiClient
 from api.upbit_client import UpbitClient
+from repos.llm_log_repo import LLMLogRepo
 from services.action_service import ActionService
 from services.candle_service import CandleService
+from services.llm_service import LLMService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
 
@@ -80,15 +82,19 @@ class SingletonPack:
             dca=self.DCA
         ))
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
+        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME))
         self.set_candle_service(CandleService())
+        self.set_llm_log_repo(LLMLogRepo())
         self.initialize_dependencies()
         
     def initialize_dependencies(self):
-        self.action_service.set_candle_service(self.candle_service)
-        self.action_service.set_gemini_client(self.gemini_client)
         self.trade_service.set_upbit_client(self.upbit_client)
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_conn(self.dbms.get_session())
+        self.llm_service.set_gemini_client(self.gemini_client)
+        self.llm_service.set_candle_service(self.candle_service)
+        self.llm_service.set_llm_log_repo(self.llm_log_repo)
+        self.llm_log_repo.set_session(self.dbms.get_session())
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
@@ -108,3 +114,9 @@ class SingletonPack:
         
     def set_trade_service(self, trade_service: TradeService):
         self.trade_service = trade_service
+        
+    def set_llm_service(self, llm_service: LLMService):
+        self.llm_service = llm_service
+        
+    def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
+        self.llm_log_repo = llm_log_repo
