@@ -10,4 +10,4 @@ class Coin(Base):
     amount = Column(Numeric(precision=20, scale=8), nullable=False) # 수량
     created_at = Column(DateTime, nullable=False, default=func.now()) # 생성시간
     member_id = Column(Integer, ForeignKey('member.id'), nullable=False, unique=True) # 회원 ID (외래키, Member 테이블과의 관계 설정)
-    member = relationship("Member", backref="coin", uselist=False) # Member 테이블과의 관계 설정
+    member = relationship("Member", back_populates="coin", uselist=False) # Member 테이블과의 관계 설정
