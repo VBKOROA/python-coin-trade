@@ -5,6 +5,7 @@ from models.dto.candle_chart import CandleChart
 from models.dto.decision import Decision
 from repos.llm_log_repo import LLMLogRepo
 from services.candle_service import CandleService
+from settings.db_connection import DBMS
 
 class LLMService:
     def __init__(self, llm_request_scheme: str):
@@ -18,6 +19,9 @@ class LLMService:
         
     def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
         self.__llm_log_repo = llm_log_repo
+        
+    def set_dbms(self, dbms: DBMS):
+        self.__dbms = dbms
         
     async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
         """
@@ -62,6 +66,7 @@ class LLMService:
         decision = Decision(json.loads(self.__gemini_client.generate_answer(prompt)))  
         decision.set_current_price(candle_chart.current_price)
         decision.set_market(candle_chart.market)
-        self.__llm_log_repo.log_decision(decision)
+        with self.__dbms.get_session() as session:
+            self.__llm_log_repo.log_decision(decision, session)
         print(str(decision))
         return decision
