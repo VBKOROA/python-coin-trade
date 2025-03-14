@@ -1,7 +1,7 @@
 class Decision:
     def __init__(self, decision: dict):
-        self.up_chance = decision["up_chance"]
-        self.down_chance = decision["down_chance"]
+        self.up_chance = int(decision["up_chance"])
+        self.down_chance = int(decision["down_chance"])
         self.details = decision["details"]
         
     def set_current_price(self, current_price: int):
