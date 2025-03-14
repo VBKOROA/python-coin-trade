@@ -10,3 +10,6 @@ class Member(Base):
     
     def minus_balance(self, amount: int):
         self.balance -= amount
+        
+    def plus_balance(self, amount: int):
+        self.balance += amount

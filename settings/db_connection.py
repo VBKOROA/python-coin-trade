@@ -35,6 +35,13 @@ class DBMS:
         """
         Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
+        
+        # Create initial test member
+        from models.db.member import Member
+        
+        with self.get_session() as session:
+            test_member = Member(name="test", balance=100000000)
+            session.add(test_member)
     
     def close_all(self):
         self.Session.remove()
