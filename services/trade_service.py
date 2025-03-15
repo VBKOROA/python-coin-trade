@@ -2,8 +2,6 @@ from api.upbit_client import UpbitClient
 from models.db.coin import Coin
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
-from sqlalchemy.orm import scoped_session
-
 from services.decision_service import DecisionAction, DecisionService
 from services.llm_service import LLMService
 from settings.db_connection import DBMS
