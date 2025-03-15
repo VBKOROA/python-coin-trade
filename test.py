@@ -49,10 +49,14 @@ def buy_and_sell_test(action_service: ActionService, member_repo: MemberRepo, db
 async def test_trade_logic(trade_service: TradeService):
     await trade_service.execute_trade_logic(1)
     
+async def fetch_5m_200_candle(upbit_client: UpbitClient):
+    candle_chart = await upbit_client.fetch_candle_chart({"5m": 200})
+    print("5분 캔들 차트:", candle_chart)
+    
 if __name__ == "__main__":
     s_pack = sgtPack()
     try:
-        asyncio.run(test_trade_logic(s_pack.trade_service))
+        asyncio.run(fetch_5m_200_candle(s_pack.upbit_client))
         # buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
