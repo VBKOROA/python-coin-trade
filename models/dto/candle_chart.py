@@ -1,3 +1,5 @@
+import json
+
 class CandleChart:
     def __init__(self):
         self.candles = {}  # 시간대별 캔들 데이터를 저장하는 딕셔너리
@@ -40,3 +42,11 @@ class CandleChart:
         
     def set_market(self, market):
         self.market = market
+        
+    def __str__(self):
+        """json 형태로 출력"""
+        return json.dumps({
+            "candles": self.candles,
+            "current_price": self.current_price,
+            "market": self.market
+        }, indent=4, ensure_ascii=False)

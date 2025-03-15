@@ -5,8 +5,7 @@ class CandleService:
         converted_list = []
         for candle in candles:
             converted_list.append(self.__candle_to_json(candle))
-        ret = json.dumps(converted_list, indent=0)
-        ret = ret.replace('\n', '')
+        ret = json.dumps(converted_list)
         return ret
     
     def __candle_to_json(self, candle: dict) -> dict:
