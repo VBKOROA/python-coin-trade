@@ -1,14 +1,15 @@
-from settings.db_connection import DBMS
-from models.decision import Decision
+from sqlalchemy.orm import scoped_session
+from models.db.llm_log import LLMLog
+from models.dto.decision import Decision
 
 class LLMLogRepo:
-    def set_dbms(self, dbms: DBMS):
-        self.dbms = dbms
-        
-    def log_decision(self, decision: Decision):
-        query = """
-            INSERT INTO llm_log (action, details, price)
-            VALUES (%s, %s, %s)
-        """
-        self.dbms.cursor.execute(query, (decision.action, decision.think, decision.current_price))
-        self.dbms.conn.commit()
+    def log_decision(self, decision: Decision, session: scoped_session):
+        llm_log = LLMLog(
+            up_chance = decision.up_chance,
+            down_chance = decision.down_chance,
+            price = decision.current_price,
+            market = decision.market,
+            details = decision.details
+        )
+        session.add(llm_log)
+        session.commit()

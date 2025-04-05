@@ -5,8 +5,8 @@ from google.genai import types
 class GeminiClient:
     def __init__(self, llm_key: str, llm_model: str, llm_response_scheme: str):
         self.__client = genai.Client(api_key=llm_key) # LLM API 클라이언트 초기화
-        self.__LLM_MODEL = llm_model
-        self.__LLM_RESPONSE_SCHEME = json.loads(llm_response_scheme) # LLM 응답 구조 초기화
+        self.__llm_model = llm_model
+        self.__llm_response_scheme = json.loads(llm_response_scheme) # LLM 응답 구조 초기화
     
     def generate_answer(self, prompt: str) -> str:
         """
@@ -18,12 +18,12 @@ class GeminiClient:
         """
         # print(prompt)
         response = self.__client.models.generate_content(
-            model=self.__LLM_MODEL,
+            model=self.__llm_model,
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 response_mime_type="application/json",
-                response_schema=self.__LLM_RESPONSE_SCHEME
+                response_schema=self.__llm_response_scheme
             )
         )
         
