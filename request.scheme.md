@@ -19,5 +19,7 @@ $5m_candle_data
 ```
 
 ## Important Note:
-*   Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most.
-*   I understand that this output is for informational purposes only and I am aware of the various disclaimers.
+*   **Step-by-step reasoning:** Concisely document each analysis step (maximum 5 words per step).
+*   **Precise probabilities:** Calculate all probabilities as whole numbers (e.g., 65%, not 65.3%).
+*   **Data limitation:** Base analysis *solely* on the provided data. No external data is permitted.
+*   **Disclaimer:** The output is for informational purposes *only* and is not financial advice. I understand the inherent risks of market prediction and acknowledge that this analysis is not a guarantee of future performance.
