@@ -2,7 +2,6 @@ from api.upbit_client import UpbitClient
 from models.db.coin import Coin
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
-from services.decision_service import DecisionAction, DecisionService
 from services.llm_service import LLMService
 from settings.db_connection import DBMS
 
@@ -23,9 +22,6 @@ class TradeService:
     def set_member_repo(self, member_repo: MemberRepo):
         self.__member_repo = member_repo
         
-    def set_decision_service(self, decision_service: DecisionService):
-        self.__decision_service = decision_service
-        
     def set_dbms(self, dbms: DBMS):
         self.__dbms = dbms
         
@@ -41,14 +37,13 @@ class TradeService:
             member = self.__member_repo.get_member_by_id(member_id, session)
             coin: Coin = member.coin
             
-            # 최종 결정을 계산한다.
-            decisionAction = self.__decision_service.decide_action(decision)
-        
-            if(decisionAction == DecisionAction.BUY):
+            # Decision 객체의 action 값을 직접 사용
+            if decision.action == "buy":
                 if(coin is None):
                     # 코인을 구매한다.
                     self.__action_service.buy_coin(member, decision, session)
-            elif(decisionAction == DecisionAction.SELL):
+            elif decision.action == "sell":
                 if(coin is not None):
                     # 코인을 판매한다.
                     self.__action_service.sell_coin(coin, decision, session)
+            # "wait" 액션은 아무것도 하지 않음

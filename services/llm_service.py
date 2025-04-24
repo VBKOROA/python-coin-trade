@@ -63,7 +63,8 @@ class LLMService:
         # prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
         # LLM 응답 생성
-        decision = Decision(json.loads(self.__gemini_client.generate_answer(prompt)))  
+        decision_json = json.loads(self.__gemini_client.generate_answer(prompt))
+        decision = Decision(decision_json)
         decision.set_current_price(candle_chart.current_price)
         decision.set_market(candle_chart.market)
         with self.__dbms.get_session() as session:
