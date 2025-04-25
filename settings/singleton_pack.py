@@ -55,7 +55,7 @@ class SingletonPack:
         self.LLM_RESPONSE_SCHEME = open("./scheme/response.scheme.json", "r").read() # LLM 응답 구조
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
-        print(f"거래 종목 설정: {self.MARKET}")
+        self.DEBUG = bool(os.environ.get("DEBUG"))
         
         # DCA 비율 설정
         temp = os.environ.get("DCA")
@@ -64,7 +64,6 @@ class SingletonPack:
         # 시간대 설정
         timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
         self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
-        print(f"시간대 설정: {self.TIMEFRAME_CONFIG}")
 
         # 싱글톤
         self.set_dbms(DBMS(
@@ -77,12 +76,13 @@ class SingletonPack:
         self.set_gemini_client(GeminiClient(
             llm_key=self.LLM_API_KEY,
             llm_model = self.LLM_MODEL,
-            llm_response_scheme=self.LLM_RESPONSE_SCHEME
+            llm_response_scheme=self.LLM_RESPONSE_SCHEME,
+            debug=self.DEBUG
         ))
-        self.set_upbit_client(UpbitClient(self.MARKET))
-        self.set_action_service(ActionService(self.DCA))
-        self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
-        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME))
+        self.set_upbit_client(UpbitClient(self.MARKET, self.DEBUG))
+        self.set_action_service(ActionService(self.DCA, self.DEBUG))
+        self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG, self.DEBUG))
+        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME, self.DEBUG))
         self.set_candle_service(CandleService())
         self.set_llm_log_repo(LLMLogRepo())
         self.set_member_repo(MemberRepo())
@@ -108,7 +108,7 @@ class SingletonPack:
     
     def set_dbms(self, dbms: DBMS):
         self.dbms = dbms
-        self.dbms.setup(drop=True) # DB 초기화 (테스트용)
+        self.dbms.setup(drop=self.DEBUG)
         
     def set_candle_service(self, candle_service: CandleService):
         self.candle_service = candle_service
