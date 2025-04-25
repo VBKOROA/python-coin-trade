@@ -10,7 +10,7 @@ class CandleService:
     
     def __candle_to_json(self, candle: dict) -> dict:
         converted = {
-            'time': candle['candle_date_time_kst'], # 시간
+            'open_time': candle['candle_date_time_kst'], # 시간
             'open': candle['opening_price'], # 시가
             'close': candle['trade_price'], # 종가
             'high': candle['high_price'], # 고가
