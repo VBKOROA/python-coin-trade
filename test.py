@@ -89,8 +89,8 @@ async def fetch_5m_200_candle(upbit_client: UpbitClient):
 if __name__ == "__main__":
     s_pack = sgtPack()
     try:
-        # asyncio.run(fetch_5m_200_candle(s_pack.upbit_client))
-        buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
+        asyncio.run(test_trade_logic(s_pack.trade_service))
+        # buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
     finally:
