@@ -1,8 +1,9 @@
 class Decision:
     def __init__(self, decision: dict):
-        self.up_chance = int(decision["up_chance"])
-        self.down_chance = int(decision["down_chance"])
-        self.details = decision["details"]
+        self.action = decision["action"]
+        self.reason = decision["reason"]
+        self.current_price = None
+        self.market = None
         
     def set_current_price(self, current_price: int):
         self.current_price = current_price
@@ -11,4 +12,4 @@ class Decision:
         self.market = market
         
     def __str__(self):
-        return f"Decision(up_chance={self.up_chance}, down_chance={self.down_chance}, details={self.details})"
+        return f"Decision(action={self.action}, reason={self.reason}, price={self.current_price}, market={self.market})"

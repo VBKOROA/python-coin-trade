@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from models.dto.candle_chart import CandleChart
 
 class UpbitClient:
-    def __init__(self, market: str):
+    def __init__(self, market: str, debug = False):
         self.__market = market
         # 지원하는 시간대와 각 시간대별 분 단위 매핑
         self.__timeframe_unit = {
@@ -18,6 +18,7 @@ class UpbitClient:
             '1h': 60,
             '4h': 240
         }
+        self.__debug = debug
         
     async def __req_data(self, unit: int, params: dict, session):
         url = f"https://api.upbit.com/v1/candles/minutes/{unit}"
@@ -116,34 +117,40 @@ class UpbitClient:
         Args:
             timeframe_config (dict, optional): 시간대별 캔들 개수 구성. 기본값은 None.
                 예: {'15m': 20, '1h': 5, '4h': 10}
-                
+
         Returns:
             CandleChart: 요청한 시간대의 캔들 데이터와 현재 가격이 설정된 CandleChart 객체.
         """
+        if self.__debug:
+            print(f"UpbitClient: Fetching candle chart for market {self.__market} with config: {timeframe_config}")
+
         candle_chart = CandleChart()
         candle_chart.set_market(self.__market)
-            
+
         async with aiohttp.ClientSession() as session:
             tasks = []
-            
+
             # 각 시간대별 캔들 데이터 요청 태스크 생성
             for timeframe, count in timeframe_config.items():
                 tasks.append(self.__get_candle_data(count, timeframe, session))
-                
+
             # 모든 요청 동시 처리
             results = await asyncio.gather(*tasks)
-            
+
             # 결과 처리 및 CandleChart에 설정
             for i, timeframe in enumerate(timeframe_config.keys()):
                 candles = results[i]
                 candle_chart.set_candles(timeframe, candles)
-                
+
             # 현재 가격 설정 (가장 작은 시간대의 마지막 캔들 종가 사용)
-            smallest_timeframe = min(timeframe_config.keys(), 
+            smallest_timeframe = min(timeframe_config.keys(),
                                     key=lambda x: self.__get_timeframe_unit(x))
             if results[list(timeframe_config.keys()).index(smallest_timeframe)]:
                 candle_chart.set_current_price(
                     results[list(timeframe_config.keys()).index(smallest_timeframe)][0]['trade_price']
                 )
-                
+
+        if self.__debug:
+            print(f"UpbitClient: Successfully fetched candle chart for market {self.__market}")
+
         return candle_chart

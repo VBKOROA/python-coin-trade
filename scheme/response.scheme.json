@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": ["buy", "sell", "wait"]
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "action",
+    "reason"
+  ]
+}

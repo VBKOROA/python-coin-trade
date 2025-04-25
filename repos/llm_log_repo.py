@@ -5,11 +5,10 @@ from models.dto.decision import Decision
 class LLMLogRepo:
     def log_decision(self, decision: Decision, session: scoped_session):
         llm_log = LLMLog(
-            up_chance = decision.up_chance,
-            down_chance = decision.down_chance,
+            action = decision.action,
+            reason = decision.reason,
             price = decision.current_price,
-            market = decision.market,
-            details = decision.details
+            market = decision.market
         )
         session.add(llm_log)
         session.commit()

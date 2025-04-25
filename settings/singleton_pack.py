@@ -10,7 +10,6 @@ from repos.llm_log_repo import LLMLogRepo
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from services.candle_service import CandleService
-from services.decision_service import DecisionService
 from services.llm_service import LLMService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
@@ -52,13 +51,11 @@ class SingletonPack:
         
         # 상수
         self.LLM_API_KEY = os.environ.get("API_KEY") # LLM API 키
-        self.LLM_REQUEST_SCHEME = open("request.scheme.md", "r").read() # LLM 요청 구조
-        self.LLM_RESPONSE_SCHEME = open("response.scheme.json", "r").read() # LLM 응답 구조
+        self.LLM_REQUEST_SCHEME = open("./scheme/request.scheme.md", "r").read() # LLM 요청 구조
+        self.LLM_RESPONSE_SCHEME = open("./scheme/response.scheme.json", "r").read() # LLM 응답 구조
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
         self.MARKET = os.environ.get("MARKET") # 거래소 마켓 (ex. KRW-BTC)
-        self.BUY_AT_UP_CHANCE_ABOVE = int(os.environ.get("BUY_AT_UP_CHANCE_ABOVE")) # 매수할 상승 확률
-        self.SELL_AT_DOWN_CHANCE_ABOVE = int(os.environ.get("SELL_AT_DOWN_CHANCE_ABOVE")) # 매도할 하락 확률
-        print(f"거래 종목 설정: {self.MARKET}")
+        self.DEBUG = bool(os.environ.get("DEBUG"))
         
         # DCA 비율 설정
         temp = os.environ.get("DCA")
@@ -67,7 +64,6 @@ class SingletonPack:
         # 시간대 설정
         timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
         self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
-        print(f"시간대 설정: {self.TIMEFRAME_CONFIG}")
 
         # 싱글톤
         self.set_dbms(DBMS(
@@ -80,16 +76,13 @@ class SingletonPack:
         self.set_gemini_client(GeminiClient(
             llm_key=self.LLM_API_KEY,
             llm_model = self.LLM_MODEL,
-            llm_response_scheme=self.LLM_RESPONSE_SCHEME
+            llm_response_scheme=self.LLM_RESPONSE_SCHEME,
+            debug=self.DEBUG
         ))
-        self.set_upbit_client(UpbitClient(self.MARKET))
-        self.set_action_service(ActionService(self.DCA))
-        self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG))
-        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME))
-        self.set_decision_service(DecisionService(
-            buy_at_up_chance_above=self.BUY_AT_UP_CHANCE_ABOVE,
-            sell_at_down_chance_above=self.SELL_AT_DOWN_CHANCE_ABOVE
-        ))
+        self.set_upbit_client(UpbitClient(self.MARKET, self.DEBUG))
+        self.set_action_service(ActionService(self.DCA, self.DEBUG))
+        self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG, self.DEBUG))
+        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME, self.DEBUG))
         self.set_candle_service(CandleService())
         self.set_llm_log_repo(LLMLogRepo())
         self.set_member_repo(MemberRepo())
@@ -103,7 +96,6 @@ class SingletonPack:
         self.trade_service.set_dbms(self.dbms)
         self.trade_service.set_member_repo(self.member_repo)
         self.trade_service.set_llm_service(self.llm_service)
-        self.trade_service.set_decision_service(self.decision_service)
         self.llm_service.set_gemini_client(self.gemini_client)
         self.llm_service.set_candle_service(self.candle_service)
         self.llm_service.set_llm_log_repo(self.llm_log_repo)
@@ -116,7 +108,7 @@ class SingletonPack:
     
     def set_dbms(self, dbms: DBMS):
         self.dbms = dbms
-        self.dbms.setup()
+        self.dbms.setup(drop=self.DEBUG)
         
     def set_candle_service(self, candle_service: CandleService):
         self.candle_service = candle_service
@@ -135,9 +127,6 @@ class SingletonPack:
         
     def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
         self.llm_log_repo = llm_log_repo
-        
-    def set_decision_service(self, decision_service: DecisionService):
-        self.decision_service = decision_service
         
     def set_member_repo(self, member_repo: MemberRepo):
         self.member_repo = member_repo
