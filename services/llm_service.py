@@ -1,5 +1,6 @@
 import json
 import re
+import datetime
 from api.gemini_client import GeminiClient
 from models.dto.candle_chart import CandleChart
 from models.dto.decision import Decision
@@ -59,11 +60,11 @@ class LLMService:
                 # 요청된 시간대의 데이터가 없는 경우 빈 데이터 표시
                 prompt = prompt.replace(placeholder, "No data available for this timeframe")
 
-        # # 현재 가격 삽입
+        # 현재 가격 삽입
         # prompt = prompt.replace("$current_price", str(candle_chart.current_price))
 
-        # # 현재 시간 삽입 (datetime 사용) (yyyy-MM-dd'T'HH:mm:ss 형식)
-        # prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+        # 현재 시간 삽입 (datetime 사용) (yyyy-MM-dd'T'HH:mm:ss 형식)
+        prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
         if self.__debug:
             print(f"LLMService: Generated prompt for LLM:\n{prompt}")

@@ -1,5 +1,10 @@
 Analyze the provided 5-minute candlestick data and decide the next trading action.
 
+**Current Time:**
+```
+$current_time
+```
+
 **Candlestick Data (5m):**
 ```json
 $5m_candle_data
