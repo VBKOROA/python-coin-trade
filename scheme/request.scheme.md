@@ -18,3 +18,6 @@ Return a JSON object with the following structure:
   "reason": "Brief explanation for the action."
 }
 ```
+
+**IMPORTANT:**
+Comprehensively consider the meaning of individual candlesticks, patterns formed by multiple candles, the current market trend, support/resistance levels, and trading volume.
