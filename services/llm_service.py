@@ -101,7 +101,8 @@ class LLMService:
             prompt = self._generate_prompt(candle_chart)
 
             # 2. LLM 응답 생성
-            response_text = await self.__gemini_client.generate_answer(prompt) # await 추가
+            # await 제거 - generate_answer는 비동기 함수가 아님
+            response_text = self.__gemini_client.generate_answer(prompt)
 
             # 3. 응답 파싱 및 Decision 생성
             decision = self._parse_llm_response(response_text, candle_chart)
