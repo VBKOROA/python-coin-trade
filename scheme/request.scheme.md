@@ -4,7 +4,7 @@
 
 **Market Information:**
 *   Current Time: $current_time
-*   Current Price: $current_price KRW
+*   Current Price: $current_price (KRW)
 
 **Candle Data:** (Analyze all provided time frame data comprehensively)
 *   5-minute chart:
@@ -13,10 +13,13 @@
   ```
 
 **Comprehensive Analysis Framework:**
-1.  **Multi-Timeframe Trend Assessment:** Discern the prevailing trend (uptrend, downtrend, consolidation) by synthesizing data across all provided timeframes. Evaluate inter-timeframe correlations and divergences.
-2.  **Critical Price Zone Identification:** Pinpoint crucial support and resistance levels that dictate potential price reversals or continuations.
-3.  **Pattern Recognition:** Scrutinize candlestick formations and broader chart patterns for predictive signals regarding future price action.
-4.  **Volume Confirmation:** Analyze trading volume in conjunction with price movements to gauge the conviction behind market trends and patterns.
+1.  **Trend Analysis:** Identify primary trend (uptrend, downtrend, sideways) and strength using MAs (e.g., 5, 20) on the provided chart. Assess potential reversals.
+2.  **Momentum Analysis:** Evaluate momentum using oscillators (e.g., RSI, MACD) for overbought/oversold conditions and divergence.
+3.  **Volatility Assessment:** Analyze price fluctuations and market volatility using Bollinger Bands or ATR.
+4.  **Support & Resistance:** Identify key S/R levels from historical data and observe price action near them.
+5.  **Candlestick Patterns:** Recognize significant patterns (e.g., Doji, Hammer) indicating potential moves.
+6.  **Volume Analysis:** Examine volume accompanying price changes to confirm trend strength or weakness.
+7.  **Synthesis:** Combine all analysis insights, evaluate confluence, and consider the current price relative to key levels for a final decision.
 
 **Decision:** Based on the above analysis, decide on the more appropriate action between **hold** or **release**.
 
