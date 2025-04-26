@@ -42,7 +42,7 @@ class DBMS:
             self.__create_test_member()
             
     def __create_test_member(self):
-        from models.db.member import Member
+        from tables.member import Member
 
         with self.get_session() as session:
             test_member = Member(name="test", balance=100000000)

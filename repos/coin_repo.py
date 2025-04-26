@@ -1,6 +1,6 @@
 from decimal import Decimal
-from models.db.coin import Coin
-from models.db.member import Member
+from tables.coin import Coin
+from tables.member import Member
 from models.dto.decision import Decision
 from sqlalchemy.orm import scoped_session
 

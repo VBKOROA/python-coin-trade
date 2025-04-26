@@ -1,12 +1,12 @@
 from api.upbit_client import UpbitClient
-from models.db.coin import Coin
+from tables.coin import Coin
 from models.dto.decision import Decision
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from services.llm_service import LLMService
 from settings.db_connection import DBMS
 from models.dto.candle_chart import CandleChart # CandleChart 임포트 추가 (타입 힌팅용)
-from models.db.member import Member # Member 임포트 추가 (타입 힌팅용)
+from tables.member import Member # Member 임포트 추가 (타입 힌팅용)
 from typing import Optional, Tuple # 타입 힌팅용 임포트 추가
 
 class TradeService:

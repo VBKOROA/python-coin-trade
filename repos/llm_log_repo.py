@@ -1,5 +1,5 @@
 from sqlalchemy.orm import scoped_session
-from models.db.llm_log import LLMLog
+from tables.llm_log import LLMLog
 from models.dto.decision import Decision
 
 class LLMLogRepo:
