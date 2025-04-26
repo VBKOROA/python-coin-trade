@@ -86,8 +86,16 @@ async def fetch_5m_200_candle(upbit_client: UpbitClient):
 if __name__ == "__main__":
     s_pack = sgtPack()
     try:
-        asyncio.run(test_trade_logic(s_pack.trade_service))
+        # asyncio.run(test_trade_logic(s_pack.trade_service))
         # buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
+        asyncio.run(test_candle_and_gemini(s_pack.upbit_client, s_pack.llm_service))
+        # Clear and recreate all tables after tests
+        print("Clearing and recreating all database tables...")
+        engine = s_pack.dbms.get_engine() # Assuming get_engine() exists
+        metadata = s_pack.dbms.get_metadata() # Assuming get_metadata() exists
+        metadata.drop_all(bind=engine)
+        metadata.create_all(bind=engine)
+        print("Database tables cleared and recreated.")
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
     finally:
