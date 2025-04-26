@@ -1,5 +1,5 @@
 import asyncio
-from api.upbit_client import UpbitClient
+from clients.upbit_client import UpbitClient
 from dtos.decision import Decision
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService

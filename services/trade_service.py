@@ -1,4 +1,4 @@
-from api.upbit_client import UpbitClient
+from clients.upbit_client import UpbitClient
 from tables.coin import Coin
 from dtos.decision import Decision
 from repos.member_repo import MemberRepo

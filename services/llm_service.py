@@ -1,7 +1,7 @@
 import json
 import re
 import datetime
-from api.gemini_client import GeminiClient
+from clients.gemini_client import GeminiClient
 from dtos.candle_chart import CandleChart
 from dtos.decision import Decision
 from repos.llm_log_repo import LLMLogRepo

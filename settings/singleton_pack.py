@@ -2,8 +2,8 @@ import os
 import json
 
 from dotenv import load_dotenv
-from api.gemini_client import GeminiClient
-from api.upbit_client import UpbitClient
+from clients.gemini_client import GeminiClient
+from clients.upbit_client import UpbitClient
 from repos.action_repo import ActionRepo
 from repos.coin_repo import CoinRepo
 from repos.llm_log_repo import LLMLogRepo
