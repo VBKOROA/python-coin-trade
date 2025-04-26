@@ -12,11 +12,11 @@
   $5m_candle_data
   ```
 
-**Analysis Guidelines:**
-1.  **Trend Analysis:** Identify the trend (upward/downward/sideways) across all provided time frames and consider the relationship between time frames.
-2.  **Key Price Levels:** Identify significant support and resistance levels.
-3.  **Candle and Chart Patterns:** Analyze meaningful candlestick patterns or chart patterns.
-4.  **Volume:** Check the relationship between price movement and trading volume.
+**Comprehensive Analysis Framework:**
+1.  **Multi-Timeframe Trend Assessment:** Discern the prevailing trend (uptrend, downtrend, consolidation) by synthesizing data across all provided timeframes. Evaluate inter-timeframe correlations and divergences.
+2.  **Critical Price Zone Identification:** Pinpoint crucial support and resistance levels that dictate potential price reversals or continuations.
+3.  **Pattern Recognition:** Scrutinize candlestick formations and broader chart patterns for predictive signals regarding future price action.
+4.  **Volume Confirmation:** Analyze trading volume in conjunction with price movements to gauge the conviction behind market trends and patterns.
 
 **Decision:** Based on the above analysis, decide on the more appropriate action between **hold** or **release**.
 
