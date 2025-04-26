@@ -66,30 +66,25 @@ class TradeService:
             # 4. LLM 결정과 현재 상태 비교하여 매수/매도 결정
             if decision.action == "hold":
                 if not has_coin:
-                    if self.__debug:
-                        print("TradeService: Decision is 'hold' and member does not have coin. Proceeding with buy.")
+                    print("TradeService: Decision is 'hold' and member does not have coin. Proceeding with buy.")
                     # 코인 구매 실행
                     self.__action_service.buy_coin(member, decision, session)
                     if self.__debug:
                         print("TradeService: Buy action completed.")
                 else:
-                    if self.__debug:
-                        print("TradeService: Decision is 'hold' and member already has coin. No action needed.")
+                    print("TradeService: Decision is 'hold' and member already has coin. No action needed.")
             elif decision.action == "release":
-                if has_coin:
-                    if self.__debug:
-                        print("TradeService: Decision is 'release' and member has coin. Proceeding with sell.")
+                if has_coin:                   
+                    print("TradeService: Decision is 'release' and member has coin. Proceeding with sell.")     
                     # 코인 판매 실행
                     self.__action_service.sell_coin(current_coin, decision, session)
                     if self.__debug:
                         print("TradeService: Sell action completed.")
                 else:
-                    if self.__debug:
-                        print("TradeService: Decision is 'release' and member does not have coin. No action needed.")
+                    print("TradeService: Decision is 'release' and member does not have coin. No action needed.")
             else:
                 # 'hold', 'release' 외 다른 값이거나 LLM 오류 시 (기본값 'wait' 등)
-                if self.__debug:
-                    print(f"TradeService: Decision is '{decision.action}'. No action taken.")
+                print(f"TradeService: Decision is '{decision.action}'. No action taken.")
 
         if self.__debug:
             print(f"TradeService: Trade logic execution finished for member ID: {member_id}")
