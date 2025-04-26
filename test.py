@@ -39,36 +39,33 @@ def buy_and_sell_test(action_service: ActionService, member_repo: MemberRepo, db
             initial_balance = member.balance
             print(f"초기 잔액: {initial_balance}")
 
-            # 구매 테스트
-            buy_decision = Decision({"action": "buy", "reason": "Test buy"})
+            # 코인이 없을 때 hold 결정 테스트 (코인 구매)
+            hold_decision = Decision({"action": "hold", "reason": "Test hold when no coin"})
             buy_price = 10000  # 가상 구매 가격
             market = s_pack.MARKET
-            buy_decision.set_current_price(buy_price)
-            buy_decision.set_market(market)
+            hold_decision.set_current_price(buy_price)
+            hold_decision.set_market(market)
 
-            print(f"구매 결정: {buy_decision}")
-            action_service.buy_coin(member, buy_decision, session)
+            print(f"'hold' 결정 (코인 없음): {hold_decision}")
+            action_service.buy_coin(member, hold_decision, session)
             session.flush() # DB에 변경사항 반영 (commit 전)
 
-            print(f"구매 후 잔액: {member.balance}")
-            print(f"구매 후 코인 보유 정보: {member.coin}")
+            print(f"'hold' 후 잔액: {member.balance}")
+            print(f"'hold' 후 코인 보유 정보: {member.coin}")
 
-            # 판매 테스트 (코인을 보유하고 있을 경우)
-            # 참고: member 객체는 메모리에서 업데이트될 수 있지만, DB 변경사항은 아직 커밋되지 않았습니다.
-            # 실제와 같은 테스트를 위해서는 다시 가져오거나 메모리 내 상태를 신중하게 처리해야 할 수 있습니다.
-            # 여기서는 메모리 내 member 객체가 구매 후 상태를 반영한다고 가정합니다.
+            # 코인이 있을 때 release 결정 테스트 (코인 판매)
             if member.coin:
-                sell_decision = Decision({"action": "sell", "reason": "Test sell"})
+                release_decision = Decision({"action": "release", "reason": "Test release when having coin"})
                 sell_price = 11000 # 가상 판매 가격
-                sell_decision.set_current_price(sell_price)
-                sell_decision.set_market(market)
+                release_decision.set_current_price(sell_price)
+                release_decision.set_market(market)
 
-                print(f"판매 결정: {sell_decision}")
-                action_service.sell_coin(member.coin, sell_decision, session)
+                print(f"'release' 결정 (코인 있음): {release_decision}")
+                action_service.sell_coin(member.coin, release_decision, session)
                 session.flush() # DB에 변경사항 반영 (commit 전)
 
-                print(f"판매 후 잔액: {member.balance}")
-                print(f"판매 후 코인 보유 정보: {member.coin}")
+                print(f"'release' 후 잔액: {member.balance}")
+                print(f"'release' 후 코인 보유 정보: {member.coin}")
             else:
                 print("판매할 코인이 없습니다.")
 

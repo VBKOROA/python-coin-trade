@@ -61,7 +61,7 @@ class LLMService:
                 prompt = prompt.replace(placeholder, "No data available for this timeframe")
 
         # 현재 가격 삽입
-        # prompt = prompt.replace("$current_price", str(candle_chart.current_price))
+        prompt = prompt.replace("$current_price", str(candle_chart.current_price))
 
         # 현재 시간 삽입 (datetime 사용) (yyyy-MM-dd'T'HH:mm:ss 형식)
         prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))

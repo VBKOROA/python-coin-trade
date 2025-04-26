@@ -1,5 +1,6 @@
 from api.upbit_client import UpbitClient
 from models.db.coin import Coin
+from models.dto.decision import Decision
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from services.llm_service import LLMService
@@ -31,61 +32,64 @@ class TradeService:
             print(f"TradeService: Executing trade logic for member ID: {member_id}")
 
         with self.__dbms.get_session() as session:
-            # 먼저 캔들 차트를 가져온다.
+            # 1. 캔들 차트 가져오기
             if self.__debug:
                 print("TradeService: Fetching candle chart...")
             candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
+            if not candle_chart or not candle_chart.current_price:
+                 print("TradeService: Failed to fetch candle chart or current price. Skipping logic.")
+                 return # 캔들 차트나 현재 가격 없으면 중단
+
             if self.__debug:
                 print("TradeService: Candle chart fetched.")
 
-            # AI한테 결정을 요청한다.
+            # 2. LLM에게 결정 요청 ('hold' 또는 'release')
             if self.__debug:
                 print("TradeService: Requesting trade decision from LLM...")
-            decision = await self.__llm_service.execute_trade_decision(candle_chart)
+            decision: Decision = await self.__llm_service.execute_trade_decision(candle_chart)
             if self.__debug:
-                print(f"TradeService: Received decision: {decision.action}")
+                print(f"TradeService: Received decision: {decision.action} (Desired state)")
 
-            # 현재 내가 가지고 있는 코인을 가져온다.
+            # 3. 현재 코인 보유 상태 확인
             if self.__debug:
                 print(f"TradeService: Fetching member {member_id} and their coin...")
             member = self.__member_repo.get_member_by_id(member_id, session)
-            coin: Coin = member.coin
-            if self.__debug:
-                print(f"TradeService: Member fetched. Has coin: {coin is not None}")
+            if not member:
+                print(f"TradeService: Member {member_id} not found. Skipping logic.")
+                return # 멤버 없으면 중단
 
-            # Decision 객체의 action 값을 직접 사용
-            if decision.action == "buy":
-                if self.__debug:
-                    print("TradeService: Decision is 'buy'.")
-                if(coin is None):
+            current_coin: Coin = member.coin
+            has_coin = current_coin is not None
+            if self.__debug:
+                print(f"TradeService: Member fetched. Currently holding coin: {has_coin}")
+
+            # 4. LLM 결정과 현재 상태 비교하여 매수/매도 결정
+            if decision.action == "hold":
+                if not has_coin:
                     if self.__debug:
-                        print("TradeService: Member does not hold coin. Proceeding with buy action.")
-                    # 코인을 구매한다.
+                        print("TradeService: Decision is 'hold' and member does not have coin. Proceeding with buy.")
+                    # 코인 구매 실행
                     self.__action_service.buy_coin(member, decision, session)
                     if self.__debug:
                         print("TradeService: Buy action completed.")
                 else:
                     if self.__debug:
-                        print("TradeService: Member already holds coin. Skipping buy action.")
-            elif decision.action == "sell":
-                if self.__debug:
-                    print("TradeService: Decision is 'sell'.")
-                if(coin is not None):
+                        print("TradeService: Decision is 'hold' and member already has coin. No action needed.")
+            elif decision.action == "release":
+                if has_coin:
                     if self.__debug:
-                        print("TradeService: Member holds coin. Proceeding with sell action.")
-                    # 코인을 판매한다.
-                    self.__action_service.sell_coin(coin, decision, session)
+                        print("TradeService: Decision is 'release' and member has coin. Proceeding with sell.")
+                    # 코인 판매 실행
+                    self.__action_service.sell_coin(current_coin, decision, session)
                     if self.__debug:
                         print("TradeService: Sell action completed.")
                 else:
                     if self.__debug:
-                        print("TradeService: Member does not hold coin. Skipping sell action.")
-            elif decision.action == "wait":
-                if self.__debug:
-                    print("TradeService: Decision is 'wait'. No action taken.")
+                        print("TradeService: Decision is 'release' and member does not have coin. No action needed.")
             else:
-                 if self.__debug:
-                    print(f"TradeService: Unknown decision action: {decision.action}. No action taken.")
+                # 'hold', 'release' 외 다른 값이거나 LLM 오류 시 (기본값 'wait' 등)
+                if self.__debug:
+                    print(f"TradeService: Decision is '{decision.action}'. No action taken.")
 
         if self.__debug:
             print(f"TradeService: Trade logic execution finished for member ID: {member_id}")

@@ -3,7 +3,7 @@
   "properties": {
     "action": {
       "type": "string",
-      "enum": ["buy", "sell", "wait"]
+      "enum": ["hold", "release"]
     },
     "reason": {
       "type": "string"
