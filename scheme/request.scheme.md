@@ -13,7 +13,7 @@
   ```
 
 **Comprehensive Analysis Framework:**
-1.  **Trend Analysis:** Identify primary trend (uptrend, downtrend, sideways) and strength using MAs (e.g., 5, 20) on the provided chart. Assess potential reversals.
+1.  **Trend Analysis:** Identify primary trend (uptrend, downtrend, sideways) and strength using MAs on the provided chart. Assess potential reversals.
 2.  **Momentum Analysis:** Evaluate momentum using oscillators (e.g., RSI, MACD) for overbought/oversold conditions and divergence.
 3.  **Volatility Assessment:** Analyze price fluctuations and market volatility using Bollinger Bands or ATR.
 4.  **Support & Resistance:** Identify key S/R levels from historical data and observe price action near them.
