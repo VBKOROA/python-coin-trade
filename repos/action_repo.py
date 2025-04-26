@@ -2,7 +2,7 @@ from decimal import Decimal
 from tables.action import Action, ActionType
 from tables.coin import Coin
 from tables.member import Member
-from models.dto.decision import Decision
+from dtos.decision import Decision
 from sqlalchemy.orm import scoped_session
 
 class ActionRepo:

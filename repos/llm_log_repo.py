@@ -1,6 +1,6 @@
 from sqlalchemy.orm import scoped_session
 from tables.llm_log import LLMLog
-from models.dto.decision import Decision
+from dtos.decision import Decision
 
 class LLMLogRepo:
     def log_decision(self, decision: Decision, session: scoped_session):

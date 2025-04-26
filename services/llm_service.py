@@ -2,8 +2,8 @@ import json
 import re
 import datetime
 from api.gemini_client import GeminiClient
-from models.dto.candle_chart import CandleChart
-from models.dto.decision import Decision
+from dtos.candle_chart import CandleChart
+from dtos.decision import Decision
 from repos.llm_log_repo import LLMLogRepo
 from services.candle_service import CandleService
 from settings.db_connection import DBMS
