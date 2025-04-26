@@ -14,9 +14,9 @@ async def test_candle_and_gemini(upbit_client: UpbitClient, llm_service: LLMServ
     """
     # 먼저 캔들 차트를 가져온다.
     # 예: 5분봉 25개 캔들
-    candle_chart = await upbit_client.fetch_candle_chart({"5m": 25})
+    candle_chart = await upbit_client.fetch_candle_chart({"15m": 25})
 
-    if not candle_chart or not candle_chart.get_candles("5m"):
+    if not candle_chart or not candle_chart.get_candles("15m"):
         print("캔들 데이터를 가져오는데 실패했습니다.")
         return
 
