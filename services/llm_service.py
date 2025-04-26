@@ -12,6 +12,11 @@ class LLMService:
     def __init__(self, llm_request_scheme: str, debug = False):
         self.__llm_request_scheme = llm_request_scheme
         self.__debug = debug
+
+    def _log_debug(self, message: str):
+        """디버그 메시지를 출력하는 헬퍼 메서드"""
+        if self.__debug:
+            print(f"LLMService: {message}")
     
     def set_gemini_client(self, gemini_client: GeminiClient):
         self.__gemini_client = gemini_client
@@ -24,32 +29,13 @@ class LLMService:
         
     def set_dbms(self, dbms: DBMS):
         self.__dbms = dbms
-                
-    async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
-        """
-        LLM(Large Language Model)을 사용하여 거래 결정을 실행합니다.
-        이 메서드는 캔들 차트 데이터를 기반으로 LLM에 요청을 보내고, LLM이 생성한 응답을 해석하여 거래 결정을 내립니다.
-        LLM 요청 스키마를 기반으로 프롬프트를 구성하고, 캔들 데이터, 현재 가격, 현재 시간 등의 정보를 프롬프트에 삽입합니다.
-        LLM으로부터 받은 응답은 JSON 형식으로 파싱되어 Decision 객체로 변환됩니다.
-        Args:
-            candle_chart (CandleChart): 거래 결정을 내리는 데 사용될 캔들 차트 데이터.
-        Returns:
-            Decision: LLM에 의해 생성된 거래 결정.
-        """
-        if self.__debug:
-            print(f"LLMService: Executing trade decision for market {candle_chart.market}")
 
-        # LLM 요청 구조 복사
+    def _generate_prompt(self, candle_chart: CandleChart) -> str:
+        """LLM 요청을 위한 프롬프트를 생성합니다."""
         prompt = self.__llm_request_scheme
-
-        # 모든 시간대의 캔들 데이터를 LLM 요청 구조에 삽입
         timeframes = candle_chart.get_all_timeframes()
-
-        # 요청 스키마에서 캔들 데이터 플레이스홀더 패턴 찾기
-        # 예: $15m_candle_data, $1h_candle_data, $4h_candle_data 등
         candle_placeholders = re.findall(r'\$([0-9]+[mhdw])_candle_data', prompt)
 
-        # 시간대별 캔들 데이터 삽입
         for timeframe in candle_placeholders:
             placeholder = f"${timeframe}_candle_data"
             if timeframe in timeframes:
@@ -57,62 +43,76 @@ class LLMService:
                 json_string = self.__candle_service.candle_to_json(candles)
                 prompt = prompt.replace(placeholder, json_string)
             else:
-                # 요청된 시간대의 데이터가 없는 경우 빈 데이터 표시
                 prompt = prompt.replace(placeholder, "No data available for this timeframe")
 
-        # 현재 가격 삽입
         prompt = prompt.replace("$current_price", str(candle_chart.current_price))
-
-        # 현재 시간 삽입 (datetime 사용) (yyyy-MM-dd'T'HH:mm:ss 형식)
         prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
-        if self.__debug:
-            print(f"LLMService: Generated prompt for LLM:\n{prompt}")
+        self._log_debug(f"Generated prompt for LLM:\n{prompt}")
+        return prompt
 
+    def _parse_llm_response(self, response_text: str, candle_chart: CandleChart) -> Decision:
+        """LLM 응답을 파싱하여 Decision 객체를 생성합니다."""
         try:
-            # LLM 응답 생성
-            response_text = self.__gemini_client.generate_answer(prompt)
-            
-            # JSON 응답 파싱
-            try:
-                decision_json = json.loads(response_text)
-            except json.JSONDecodeError as e:
-                if self.__debug:
-                    print(f"LLMService: Error parsing JSON response: {str(e)}")
-                    print(f"LLMService: Invalid response: {response_text}")
-                # 기본 결정 생성
-                decision_json = {"action": "wait", "reason": f"Error parsing LLM response: {str(e)}"}
-            
-            decision = Decision(decision_json)
-            decision.set_current_price(candle_chart.current_price)
-            decision.set_market(candle_chart.market)
+            decision_json = json.loads(response_text)
+        except json.JSONDecodeError as e:
+            error_message = f"Error parsing LLM response: {str(e)}"
+            self._log_debug(error_message)
+            self._log_debug(f"Invalid response: {response_text}")
+            # 파싱 오류 시 기본 결정 생성
+            decision_json = {"action": "wait", "reason": error_message}
 
-            if self.__debug:
-                print(f"LLMService: Received decision from LLM: {decision.action} with reason: {decision.reason}")
+        decision = Decision(decision_json)
+        decision.set_current_price(candle_chart.current_price)
+        decision.set_market(candle_chart.market)
+        return decision
 
+    def _log_decision(self, decision: Decision):
+        """결정을 데이터베이스에 로깅합니다."""
+        try:
             with self.__dbms.get_session() as session:
                 self.__llm_log_repo.log_decision(decision, session)
+            self._log_debug("Logged decision to DB.")
+        except Exception as log_error:
+            self._log_debug(f"Error logging decision to DB: {str(log_error)}")
 
-            if self.__debug:
-                print(f"LLMService: Logged decision to DB.")
+    def _handle_error(self, error: Exception, candle_chart: CandleChart) -> Decision:
+        """오류 발생 시 기본 결정을 생성하고 로깅합니다."""
+        error_message = f"Error in LLM service: {str(error)}"
+        self._log_debug(error_message)
+
+        decision_json = {"action": "wait", "reason": error_message}
+        decision = Decision(decision_json)
+        decision.set_current_price(candle_chart.current_price)
+        decision.set_market(candle_chart.market)
+
+        # 오류 발생 시에도 로깅 시도
+        self._log_decision(decision)
+        return decision
+
+    async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
+        """
+        LLM(Large Language Model)을 사용하여 거래 결정을 실행합니다.
+        """
+        self._log_debug(f"Executing trade decision for market {candle_chart.market}")
+
+        try:
+            # 1. 프롬프트 생성
+            prompt = self._generate_prompt(candle_chart)
+
+            # 2. LLM 응답 생성
+            response_text = await self.__gemini_client.generate_answer(prompt) # await 추가
+
+            # 3. 응답 파싱 및 Decision 생성
+            decision = self._parse_llm_response(response_text, candle_chart)
+
+            self._log_debug(f"Received decision from LLM: {decision.action} with reason: {decision.reason}")
+
+            # 4. 결정 로깅
+            self._log_decision(decision)
 
             return decision
-            
+
         except Exception as e:
-            if self.__debug:
-                print(f"LLMService: Error executing trade decision: {str(e)}")
-            
-            # 에러 발생 시 기본 결정 반환
-            decision_json = {"action": "wait", "reason": f"Error in LLM service: {str(e)}"}
-            decision = Decision(decision_json)
-            decision.set_current_price(candle_chart.current_price)
-            decision.set_market(candle_chart.market)
-            
-            try:
-                with self.__dbms.get_session() as session:
-                    self.__llm_log_repo.log_decision(decision, session)
-            except Exception as log_error:
-                if self.__debug:
-                    print(f"LLMService: Error logging decision to DB: {str(log_error)}")
-            
-            return decision
+            # 5. 예외 처리
+            return self._handle_error(e, candle_chart)
