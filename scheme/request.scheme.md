@@ -14,10 +14,10 @@
 
 **Comprehensive Analysis Framework:**
 1.  **Trend Analysis:** Identify primary trend (uptrend, downtrend, sideways) and strength using MAs on the provided chart. Assess potential reversals.
-2.  **Momentum Analysis:** Evaluate momentum using oscillators (e.g., RSI, MACD) for overbought/oversold conditions and divergence.
+2.  **Momentum Analysis:** Evaluate momentum using oscillators for overbought/oversold conditions and divergence.
 3.  **Volatility Assessment:** Analyze price fluctuations and market volatility using Bollinger Bands or ATR.
 4.  **Support & Resistance:** Identify key S/R levels from historical data and observe price action near them.
-5.  **Candlestick Patterns:** Recognize significant patterns (e.g., Doji, Hammer) indicating potential moves.
+5.  **Candlestick Patterns:** Recognize significant patterns indicating potential moves.
 6.  **Volume Analysis:** Examine volume accompanying price changes to confirm trend strength or weakness.
 7.  **Synthesis:** Combine all analysis insights, evaluate confluence, and consider the current price relative to key levels for a final decision.
 
