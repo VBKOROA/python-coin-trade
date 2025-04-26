@@ -34,16 +34,25 @@ class DBMS:
         이 메서드는 기존의 모든 테이블을 삭제하고 Base 메타데이터를 기반으로 새 테이블을 생성합니다.
         """
         if drop:
-            Base.metadata.drop_all(self.__engine)
-        Base.metadata.create_all(self.__engine)
+            self.drop_all()
+        self.create_all()
         
         if drop:
             # Create initial test member
-            from models.db.member import Member
+            self.__create_test_member()
             
-            with self.get_session() as session:
-                test_member = Member(name="test", balance=100000000)
-                session.add(test_member)
+    def __create_test_member(self):
+        from models.db.member import Member
+
+        with self.get_session() as session:
+            test_member = Member(name="test", balance=100000000)
+            session.add(test_member)
     
     def close_all(self):
         self.Session.remove()
+        
+    def drop_all(self):
+        Base.metadata.drop_all(self.__engine)
+        
+    def create_all(self):
+        Base.metadata.create_all(self.__engine)

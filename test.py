@@ -91,10 +91,7 @@ if __name__ == "__main__":
         asyncio.run(test_candle_and_gemini(s_pack.upbit_client, s_pack.llm_service))
         # Clear and recreate all tables after tests
         print("Clearing and recreating all database tables...")
-        engine = s_pack.dbms.get_engine() # Assuming get_engine() exists
-        metadata = s_pack.dbms.get_metadata() # Assuming get_metadata() exists
-        metadata.drop_all(bind=engine)
-        metadata.create_all(bind=engine)
+        s_pack.dbms.drop_all()
         print("Database tables cleared and recreated.")
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
