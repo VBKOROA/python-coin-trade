@@ -35,3 +35,6 @@
 *   **hold**: Should buy or continue to hold the currently owned coin.
 *   **release**: Should sell or observe without buying the coin.
 *   **reason**: Briefly mention key factors such as analyzed trends, price levels, patterns, and volume.
+
+**Important:**
+*   **Trading Fee:** Transaction Amount (Order Quantity x Order Price) x Trading Fee Rate (%)
