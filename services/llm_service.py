@@ -34,16 +34,19 @@ class LLMService:
         """LLM 요청을 위한 프롬프트를 생성합니다."""
         prompt = self.__llm_request_scheme
         timeframes = candle_chart.get_all_timeframes()
-        candle_placeholders = re.findall(r'\$([0-9]+[mhdw])_candle_data', prompt)
 
-        for timeframe in candle_placeholders:
-            placeholder = f"${timeframe}_candle_data"
-            if timeframe in timeframes:
-                candles = candle_chart.get_candles(timeframe)
+        # 동적으로 캔들 데이터 섹션 생성
+        candle_data_markdown = ""
+        for timeframe in timeframes:
+            candles = candle_chart.get_candles(timeframe)
+            if candles:
                 json_string = self.__candle_service.candle_to_json(candles)
-                prompt = prompt.replace(placeholder, json_string)
+                candle_data_markdown += f"*   {timeframe} chart:\n  ```json\n  {json_string}\n  ```\n\n"
             else:
-                prompt = prompt.replace(placeholder, "No data available for this timeframe")
+                candle_data_markdown += f"*   {timeframe} chart:\n  ```json\n  No data available for this timeframe\n  ```\n\n"
+
+        # 생성된 마크다운으로 플레이스홀더 교체
+        prompt = prompt.replace("$candle_data_section", candle_data_markdown.strip())
 
         prompt = prompt.replace("$current_price", str(candle_chart.current_price))
         prompt = prompt.replace("$current_time", datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
