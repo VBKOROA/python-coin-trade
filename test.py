@@ -14,7 +14,7 @@ async def test_candle_and_gemini(upbit_client: UpbitClient, llm_service: LLMServ
     """
     # 먼저 캔들 차트를 가져온다.
     # 예: 5분봉 25개 캔들
-    candle_chart = await upbit_client.fetch_candle_chart({"15m": 25})
+    candle_chart = await upbit_client.fetch_candle_chart({"15m": 25, "5m": 25, "4h": 25})
 
     if not candle_chart or not candle_chart.get_candles("15m"):
         print("캔들 데이터를 가져오는데 실패했습니다.")
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         asyncio.run(test_candle_and_gemini(s_pack.upbit_client, s_pack.llm_service))
         # Clear and recreate all tables after tests
         print("Clearing and recreating all database tables...")
-        s_pack.dbms.drop_all()
+        s_pack.dbms.setup(drop=True)
         print("Database tables cleared and recreated.")
     except KeyboardInterrupt:
         print("프로그램이 종료되었습니다.")
