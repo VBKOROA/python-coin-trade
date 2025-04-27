@@ -51,6 +51,8 @@ class SingletonPack:
         
         # 상수
         self.LLM_API_KEY = os.environ.get("API_KEY") # LLM API 키
+        if not self.LLM_API_KEY:
+            raise ValueError("API_KEY 환경 변수가 설정되지 않았습니다.")
         self.LLM_REQUEST_SCHEME = open("./scheme/request.scheme.md", "r").read() # LLM 요청 구조
         self.LLM_RESPONSE_SCHEME = open("./scheme/response.scheme.json", "r").read() # LLM 응답 구조
         self.LLM_MODEL = os.environ.get("LLM_MODEL") # LLM 모델 (ex. gemini-2.0-pro-exp-02-05)
@@ -59,11 +61,22 @@ class SingletonPack:
         
         # DCA 비율 설정
         temp = os.environ.get("DCA")
-        self.DCA = int(temp) / 100 # DCA 비율 (ex. 0.01 = 1%)
+        self.DCA = float(temp) / 100 if temp else 0.01 # DCA 비율 (ex. 0.01 = 1%)
         
-        # 시간대 설정
+        # 시간대 설정 로드 및 유효성 검사
         timeframe_config_str = os.environ.get("TIMEFRAME_CONFIG")
-        self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
+        if timeframe_config_str:
+            try:
+                self.TIMEFRAME_CONFIG = json.loads(timeframe_config_str)
+                if not isinstance(self.TIMEFRAME_CONFIG, dict) or not self.TIMEFRAME_CONFIG:
+                    raise ValueError("TIMEFRAME_CONFIG는 비어 있지 않은 JSON 객체여야 합니다.")
+            except json.JSONDecodeError:
+                raise ValueError("TIMEFRAME_CONFIG 환경 변수가 유효한 JSON 형식이 아닙니다.")
+            except ValueError as e:
+                raise ValueError(f"TIMEFRAME_CONFIG 설정 오류: {e}")
+        else:
+            # 기본값 설정 또는 오류 발생 (오류 발생 선택)
+            raise ValueError("TIMEFRAME_CONFIG 환경 변수가 설정되지 않았습니다.")
 
         # 싱글톤
         self.set_dbms(DBMS(
@@ -102,6 +115,41 @@ class SingletonPack:
         self.llm_service.set_dbms(self.dbms)
         self.action_service.set_action_repo(self.action_repo)
         self.action_service.set_coin_repo(self.coin_repo)
+    
+    def __parse_timeframe_to_minutes(self, timeframe: str) -> int:
+        """ 시간대 문자열을 분 단위 정수로 변환합니다. (예: '5m' -> 5, '1h' -> 60) """
+        unit_map = {'m': 1, 'h': 60, 'd': 1440, 'w': 10080} # 분, 시, 일, 주
+        try:
+            if timeframe[-1] in unit_map:
+                unit = timeframe[-1]
+                value = int(timeframe[:-1])
+                return value * unit_map[unit]
+            else: # 분 단위 숫자만 있는 경우 (Upbit API 호환)
+                return int(timeframe)
+        except (ValueError, IndexError, KeyError):
+            # 숫자만 있는 경우 분으로 간주 (예: '3', '5', '10')
+            try:
+                return int(timeframe)
+            except ValueError:
+                raise ValueError(f"지원하지 않거나 잘못된 시간대 형식입니다: {timeframe}")
+    
+    def get_smallest_timeframe_minutes(self) -> int:
+        """ TIMEFRAME_CONFIG에서 가장 작은 시간 간격(분)을 반환합니다. """
+        if not self.TIMEFRAME_CONFIG:
+            # 설정이 없을 경우 기본값 또는 오류 처리 (여기서는 오류 발생시키도록 __init__에서 처리됨)
+            raise ValueError("TIMEFRAME_CONFIG가 설정되지 않아 최소 시간 간격을 계산할 수 없습니다.")
+
+        try:
+            minutes = [self.__parse_timeframe_to_minutes(tf) for tf in self.TIMEFRAME_CONFIG.keys()]
+            if not minutes:
+                raise ValueError("TIMEFRAME_CONFIG에 유효한 시간대가 없습니다.")
+            smallest = min(minutes)
+            if smallest <= 0:
+                raise ValueError("시간 간격은 0보다 커야 합니다.")
+            return smallest
+        except ValueError as e:
+            # __parse_timeframe_to_minutes 에서 발생한 오류 포함
+            raise ValueError(f"TIMEFRAME_CONFIG 처리 중 오류 발생: {e}")
         
     def set_action_service(self, action_service: ActionService):
         self.action_service = action_service
