@@ -38,6 +38,9 @@ class TradeService:
     async def _fetch_trade_prerequisites(self, member_id: int, session) -> Optional[Tuple[CandleChart, Decision, Member]]:
         """거래 로직 실행에 필요한 데이터를 가져옵니다."""
         self._log_debug("Fetching candle chart...")
+        # BUGFIX:
+        self._log_debug(f"Passing timeframe_config to UpbitClient: {self.__timeframe_config}")
+        # :END
         candle_chart = await self.__upbit_client.fetch_candle_chart(self.__timeframe_config)
         if not candle_chart or not candle_chart.current_price:
              print("TradeService: Failed to fetch candle chart or current price. Skipping logic.")
