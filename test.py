@@ -81,9 +81,9 @@ async def fetch_5m_200_candle(upbit_client: UpbitClient):
 if __name__ == "__main__":
     s_pack = sgtPack()
     try:
-        # asyncio.run(test_trade_logic(s_pack.trade_service))
+        asyncio.run(test_trade_logic(s_pack.trade_service))
         # buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
-        asyncio.run(test_candle_and_decision(s_pack.upbit_client, s_pack.decision_service))
+        # asyncio.run(test_candle_and_decision(s_pack.upbit_client, s_pack.decision_service))
         # Clear and recreate all tables after tests
         print("Clearing and recreating all database tables...")
         s_pack.dbms.setup(drop=True)
