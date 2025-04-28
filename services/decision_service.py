@@ -4,5 +4,5 @@ from dtos.decision import Decision
 
 class DecisionService(ABC):
     @abstractmethod
-    def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
+    async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
         pass

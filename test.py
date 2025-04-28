@@ -18,7 +18,7 @@ async def test_candle_and_decision(upbit_client: UpbitClient, decision_service: 
     print("가져온 캔들 차트:", candle_chart)
 
     # AI한테 결정을 요청한다.
-    decision = decision_service.execute_trade_decision(candle_chart)
+    decision = await decision_service.execute_trade_decision(candle_chart)
 
     print("결정:", decision)
     

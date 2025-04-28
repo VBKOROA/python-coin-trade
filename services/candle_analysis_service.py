@@ -113,7 +113,7 @@ class CandleAnalysisService(DecisionService):
         self._log_debug("Ichimoku indicators calculation completed")
         return df
 
-    def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
+    async def execute_trade_decision(self, candle_chart: CandleChart) -> Decision:
         """Ichimoku Multi-Timeframe 전략 실행"""
         self._log_debug(f"Executing trade decision for market {candle_chart.market}")
         
