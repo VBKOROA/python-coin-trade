@@ -4,15 +4,35 @@ from dtos.decision import Decision
 from services.decision_service import DecisionService
 import numpy as np # NaN 값 처리를 위해 numpy 사용
 import re # 시간 프레임 문자열 파싱을 위해 re 사용
+from enum import Enum # Enum 정의를 위해 enum 모듈 추가
+
+# Action 열거형 정의
+class Action(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+    NEUTRAL = "NEUTRAL"
+
+# Trend 열거형 정의
+class Trend(str, Enum):
+    BULLISH = "BULLISH"
+    BEARISH = "BEARISH"
+    NEUTRAL = "NEUTRAL"
 
 class CandleAnalysisService(DecisionService):
+    # Ichimoku 파라미터를 클래스 상수로 정의
+    DEFAULT_TENKAN_PERIOD = 9
+    DEFAULT_KIJUN_PERIOD = 26
+    DEFAULT_SENKOU_B_PERIOD = 52
+    DEFAULT_CHIKOU_OFFSET = 26
+    DEFAULT_SENKOU_OFFSET = 26
+
     def __init__(self,
                  debug: bool = False,
-                 tenkan_period: int = 9,
-                 kijun_period: int = 26,
-                 senkou_b_period: int = 52,
-                 chikou_offset: int = 26,
-                 senkou_offset: int = 26):
+                 tenkan_period: int = DEFAULT_TENKAN_PERIOD,
+                 kijun_period: int = DEFAULT_KIJUN_PERIOD,
+                 senkou_b_period: int = DEFAULT_SENKOU_B_PERIOD,
+                 chikou_offset: int = DEFAULT_CHIKOU_OFFSET,
+                 senkou_offset: int = DEFAULT_SENKOU_OFFSET):
         """
         Ichimoku Multi-Timeframe 분석 서비스 초기화
         Args:
@@ -98,7 +118,7 @@ class CandleAnalysisService(DecisionService):
         available_timeframes = candle_chart.get_all_timeframes()
         if len(available_timeframes) < 2:
             self._log_debug("Insufficient timeframes: requires at least two timeframes")
-            return Decision({"action": "NEUTRAL", "reason": "Requires at least two timeframes in CandleChart"})
+            return Decision({"action": Action.NEUTRAL, "reason": "Requires at least two timeframes in CandleChart"})
 
         # 시간 프레임을 분 단위로 변환하여 정렬
         try:
@@ -106,7 +126,7 @@ class CandleAnalysisService(DecisionService):
             self._log_debug(f"Parsed timeframes to minutes: {timeframes_minutes}")
         except ValueError as e:
              self._log_debug(f"Error parsing timeframes: {e}")
-             return Decision({"action": "NEUTRAL", "reason": f"Error parsing timeframes: {e}"})
+             return Decision({"action": Action.NEUTRAL, "reason": f"Error parsing timeframes: {e}"})
              
         sorted_timeframes = sorted(timeframes_minutes.keys(), key=lambda tf: timeframes_minutes[tf])
         
@@ -122,7 +142,7 @@ class CandleAnalysisService(DecisionService):
 
         if not htf_candles or not ltf_candles or len(htf_candles) < self.senkou_b_period or len(ltf_candles) < self.senkou_b_period:
             self._log_debug(f"Insufficient candle data for HTF({htf}) or LTF({ltf})")
-            return Decision({"action": "NEUTRAL", "reason": f"Insufficient candle data for HTF({htf}) or LTF({ltf})"})
+            return Decision({"action": Action.NEUTRAL, "reason": f"Insufficient candle data for HTF({htf}) or LTF({ltf})"})
 
         # 데이터프레임 생성 (컬럼명은 일반적인 형태 가정, 필요시 조정)
         self._log_debug("Creating dataframes for HTF and LTF")
@@ -149,13 +169,13 @@ class CandleAnalysisService(DecisionService):
         ltf_analysis = ltf_ichimoku.dropna()
         if len(ltf_analysis) < 2:
              self._log_debug(f"Insufficient LTF({ltf}) data for crossover analysis")
-             return Decision({"action": "NEUTRAL", "reason": f"Insufficient LTF({ltf}) data for crossover analysis"})
+             return Decision({"action": Action.NEUTRAL, "reason": f"Insufficient LTF({ltf}) data for crossover analysis"})
         ltf_latest = ltf_analysis.iloc[-1]
         ltf_previous = ltf_analysis.iloc[-2]
 
         # --- HTF Trend Assessment ---
         self._log_debug("Assessing HTF trend")
-        htf_trend = "NEUTRAL"
+        htf_trend = Trend.NEUTRAL
         # Chikou Span 비교를 위한 과거 가격 (chikou_offset 이전 캔들)
         htf_price_at_chikou_time_index = htf_ichimoku.index.get_loc(htf_latest.name) - self.chikou_offset
         htf_price_at_chikou_time = np.nan
@@ -173,17 +193,17 @@ class CandleAnalysisService(DecisionService):
                           # Optional: and htf_latest['senkou_span_a'] < htf_latest['senkou_span_b']
 
         if is_htf_bullish:
-            htf_trend = "BULLISH"
+            htf_trend = Trend.BULLISH
             self._log_debug("HTF trend is BULLISH")
         elif is_htf_bearish:
-            htf_trend = "BEARISH"
+            htf_trend = Trend.BEARISH
             self._log_debug("HTF trend is BEARISH")
         else:
             self._log_debug("HTF trend is NEUTRAL")
 
         # --- LTF Entry Signal Generation ---
         self._log_debug("Generating LTF entry signals")
-        action = "NEUTRAL"
+        action = Action.NEUTRAL
         reason = f"HTF({htf}) Trend: {htf_trend}"
 
         # Chikou Span 비교를 위한 과거 가격 (chikou_offset 이전 캔들)
@@ -192,7 +212,7 @@ class CandleAnalysisService(DecisionService):
         if ltf_price_at_chikou_time_index >= 0 and ltf_price_at_chikou_time_index < len(ltf_ichimoku): # 인덱스 범위 확인 추가
              ltf_price_at_chikou_time = ltf_ichimoku.iloc[ltf_price_at_chikou_time_index]['close']
 
-        if htf_trend == "BULLISH":
+        if htf_trend == Trend.BULLISH:
             # LTF Buy Signal (TK Cross Above Kumo)
             tk_crossed_up = (ltf_previous['tenkan_sen'] <= ltf_previous['kijun_sen'] and 
                              ltf_latest['tenkan_sen'] > ltf_latest['kijun_sen'])
@@ -202,11 +222,11 @@ class CandleAnalysisService(DecisionService):
                                ltf_latest['chikou_span'] > ltf_price_at_chikou_time)
 
             if tk_crossed_up and cross_above_kumo and price_above_kumo and chikou_confirms:
-                action = "BUY"
+                action = Action.BUY
                 reason = f"HTF({htf}) Bullish & LTF({ltf}) TK Cross Above Kumo Confirmed. HTF Close: {htf_latest['close']:.2f}, HTF Kumo Top: {htf_latest['kumo_top']:.2f}. LTF Close: {ltf_latest['close']:.2f}, LTF Kumo Top: {ltf_latest['kumo_top']:.2f}"
                 self._log_debug(f"BUY signal generated: {reason}")
 
-        elif htf_trend == "BEARISH":
+        elif htf_trend == Trend.BEARISH:
             # LTF Sell Signal (TK Cross Below Kumo)
             tk_crossed_down = (ltf_previous['tenkan_sen'] >= ltf_previous['kijun_sen'] and 
                                ltf_latest['tenkan_sen'] < ltf_latest['kijun_sen'])
@@ -216,7 +236,7 @@ class CandleAnalysisService(DecisionService):
                                ltf_latest['chikou_span'] < ltf_price_at_chikou_time)
 
             if tk_crossed_down and cross_below_kumo and price_below_kumo and chikou_confirms:
-                action = "SELL"
+                action = Action.SELL
                 reason = f"HTF({htf}) Bearish & LTF({ltf}) TK Cross Below Kumo Confirmed. HTF Close: {htf_latest['close']:.2f}, HTF Kumo Bottom: {htf_latest['kumo_bottom']:.2f}. LTF Close: {ltf_latest['close']:.2f}, LTF Kumo Bottom: {ltf_latest['kumo_bottom']:.2f}"
                 self._log_debug(f"SELL signal generated: {reason}")
 
