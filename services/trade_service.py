@@ -1,5 +1,4 @@
 from clients.upbit_client import UpbitClient
-from repos.decision_log_repo import DecisionLogRepo
 from services.decision_service import DecisionService
 from tables.coin import Coin
 from dtos.decision import Decision
