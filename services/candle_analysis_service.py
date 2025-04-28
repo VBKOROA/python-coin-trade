@@ -1,10 +1,13 @@
 import pandas as pd # 데이터 처리를 위해 pandas 사용
 from dtos.candle_chart import CandleChart
 from dtos.decision import Decision
+from repos.decision_log_repo import DecisionLogRepo
 from services.decision_service import DecisionService
 import numpy as np # NaN 값 처리를 위해 numpy 사용
 import re # 시간 프레임 문자열 파싱을 위해 re 사용
-from enum import Enum # Enum 정의를 위해 enum 모듈 추가
+from enum import Enum
+
+from settings.db_connection import DBMS
 
 # Action 열거형 정의
 class Action(str, Enum):
@@ -52,6 +55,12 @@ class CandleAnalysisService(DecisionService):
         self.chikou_offset = chikou_offset
         self.senkou_offset = senkou_offset
         
+    def set_decision_log_repo(self, decision_log_repo: DecisionLogRepo):
+        self.__decision_log_repo = decision_log_repo
+        
+    def set_dbms(self, dbms: DBMS):
+        self.__dbms = dbms
+        
     def _log_debug(self, message: str):
         """디버그 메시지를 출력하는 헬퍼 메서드"""
         if self.debug:
@@ -73,6 +82,18 @@ class CandleAnalysisService(DecisionService):
             return value * 60 * 24
         else:
             raise ValueError(f"Unknown timeframe unit: {unit}")
+        
+    def _create_decision(self, action: Action, reason: str, current_price: int = None, market: str = None) -> Decision:
+        try:
+            decision = Decision({"action": action, "reason": reason})
+            decision.set_market(market)
+            decision.set_current_price(current_price)
+            with self.__dbms.get_session() as session:
+                self.__decision_log_repo.log_decision(decision, session)
+            return decision
+        except Exception as e:
+            self._log_debug(f"Error creating decision: {e}")
+            return Decision({"action": Action.NEUTRAL, "reason": f"Error creating decision: {e}"})
 
     def _calculate_ichimoku(self, df: pd.DataFrame) -> pd.DataFrame:
         """Ichimoku 지표 계산"""
@@ -120,7 +141,7 @@ class CandleAnalysisService(DecisionService):
         available_timeframes = candle_chart.get_all_timeframes()
         if len(available_timeframes) < 2:
             self._log_debug("Insufficient timeframes: requires at least two timeframes")
-            return Decision({"action": Action.NEUTRAL, "reason": "Requires at least two timeframes in CandleChart"})
+            return self._create_decision(Action.NEUTRAL, "Requires at least two timeframes in CandleChart")
 
         # 시간 프레임을 분 단위로 변환하여 정렬
         try:
@@ -128,7 +149,7 @@ class CandleAnalysisService(DecisionService):
             self._log_debug(f"Parsed timeframes to minutes: {timeframes_minutes}")
         except ValueError as e:
              self._log_debug(f"Error parsing timeframes: {e}")
-             return Decision({"action": Action.NEUTRAL, "reason": f"Error parsing timeframes: {e}"})
+             return self._create_decision(Action.NEUTRAL, f"Error parsing timeframes: {e}")
              
         sorted_timeframes = sorted(timeframes_minutes.keys(), key=lambda tf: timeframes_minutes[tf])
         
@@ -144,7 +165,7 @@ class CandleAnalysisService(DecisionService):
 
         if not htf_candles or not ltf_candles or len(htf_candles) < self.senkou_b_period or len(ltf_candles) < self.senkou_b_period:
             self._log_debug(f"Insufficient candle data for HTF({htf}) or LTF({ltf})")
-            return Decision({"action": Action.NEUTRAL, "reason": f"Insufficient candle data for HTF({htf}) or LTF({ltf})"})
+            return self._create_decision(Action.NEUTRAL, f"Insufficient candle data for HTF({htf}) or LTF({ltf})")
 
         # 데이터프레임 생성 (컬럼명은 일반적인 형태 가정, 필요시 조정)
         self._log_debug("Creating dataframes for HTF and LTF")
@@ -169,13 +190,13 @@ class CandleAnalysisService(DecisionService):
         htf_analysis = htf_ichimoku.dropna()
         if htf_analysis.empty:
             self._log_debug(f"HTF({htf}) data insufficient after dropna()")
-            return Decision({"action": Action.NEUTRAL, "reason": f"HTF({htf}) data insufficient after dropna()"})
+            return self._create_decision(Action.NEUTRAL, f"HTF({htf}) data insufficient after dropna()")
         htf_latest = htf_analysis.iloc[-1]
         # LTF는 현재와 이전 캔들 필요 (크로스오버 확인용)
         ltf_analysis = ltf_ichimoku.dropna()
         if len(ltf_analysis) < 2:
              self._log_debug(f"Insufficient LTF({ltf}) data for crossover analysis")
-             return Decision({"action": Action.NEUTRAL, "reason": f"Insufficient LTF({ltf}) data for crossover analysis"})
+             return self._create_decision(Action.NEUTRAL, f"Insufficient LTF({ltf}) data for crossover analysis")
         ltf_latest = ltf_analysis.iloc[-1]
         ltf_previous = ltf_analysis.iloc[-2]
 
@@ -249,8 +270,6 @@ class CandleAnalysisService(DecisionService):
                 reason = f"HTF({htf}) Bearish & LTF({ltf}) TK Cross Below Kumo Confirmed. HTF Close: {htf_latest['close']:.2f}, HTF Kumo Bottom: {htf_latest['kumo_bottom']:.2f}. LTF Close: {ltf_latest['close']:.2f}, LTF Kumo Bottom: {ltf_latest['kumo_bottom']:.2f}"
                 self._log_debug(f"SELL signal generated: {reason}")
 
-        decision = Decision({"action": action, "reason": reason})
-        decision.set_current_price(current_price)
-        decision.set_market(market)
+        decision = self._create_decision(action, reason, current_price, market)
         self._log_debug(f"Final decision: {action} with reason: {reason}")
         return decision

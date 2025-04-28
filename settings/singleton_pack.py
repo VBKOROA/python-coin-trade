@@ -105,6 +105,8 @@ class SingletonPack:
         self.initialize_dependencies()
         
     def initialize_dependencies(self):
+        self.decision_service.set_dbms(self.dbms)
+        self.decision_service.set_decision_log_repo(self.decision_log_repo)
         self.trade_service.set_upbit_client(self.upbit_client)
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_dbms(self.dbms)
