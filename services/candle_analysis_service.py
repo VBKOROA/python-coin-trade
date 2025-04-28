@@ -27,6 +27,7 @@ class CandleAnalysisService(DecisionService):
     DEFAULT_SENKOU_OFFSET = 26
 
     def __init__(self,
+                 strict_mode: bool = False,
                  debug: bool = False,
                  tenkan_period: int = DEFAULT_TENKAN_PERIOD,
                  kijun_period: int = DEFAULT_KIJUN_PERIOD,
@@ -44,6 +45,7 @@ class CandleAnalysisService(DecisionService):
             senkou_offset (int): Senkou Span 오프셋
         """
         self.debug = debug
+        self.strict_mode = strict_mode
         self.tenkan_period = tenkan_period
         self.kijun_period = kijun_period
         self.senkou_b_period = senkou_b_period
@@ -164,7 +166,11 @@ class CandleAnalysisService(DecisionService):
         ltf_ichimoku = self._calculate_ichimoku(ltf_df.copy())
 
         # 최신 데이터 가져오기 (NaN 값 제거 후)
-        htf_latest = htf_ichimoku.dropna().iloc[-1]
+        htf_analysis = htf_ichimoku.dropna()
+        if htf_analysis.empty:
+            self._log_debug(f"HTF({htf}) data insufficient after dropna()")
+            return Decision({"action": Action.NEUTRAL, "reason": f"HTF({htf}) data insufficient after dropna()"})
+        htf_latest = htf_analysis.iloc[-1]
         # LTF는 현재와 이전 캔들 필요 (크로스오버 확인용)
         ltf_analysis = ltf_ichimoku.dropna()
         if len(ltf_analysis) < 2:
@@ -185,12 +191,15 @@ class CandleAnalysisService(DecisionService):
         is_htf_bullish = (htf_latest['close'] > htf_latest['kumo_top'] and 
                           not np.isnan(htf_price_at_chikou_time) and
                           htf_latest['chikou_span'] > htf_price_at_chikou_time)
-                          # Optional: and htf_latest['senkou_span_a'] > htf_latest['senkou_span_b']
                           
         is_htf_bearish = (htf_latest['close'] < htf_latest['kumo_bottom'] and
                           not np.isnan(htf_price_at_chikou_time) and
                           htf_latest['chikou_span'] < htf_price_at_chikou_time)
-                          # Optional: and htf_latest['senkou_span_a'] < htf_latest['senkou_span_b']
+
+        if self.strict_mode:
+            # 추가적인 조건을 확인합니다.
+            is_htf_bullish = is_htf_bullish and htf_latest['senkou_span_a'] > htf_latest['senkou_span_b']
+            is_htf_bearish = is_htf_bearish and htf_latest['senkou_span_a'] < htf_latest['senkou_span_b']
 
         if is_htf_bullish:
             htf_trend = Trend.BULLISH
