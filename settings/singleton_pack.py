@@ -9,8 +9,9 @@ from repos.coin_repo import CoinRepo
 from repos.llm_log_repo import LLMLogRepo
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
+from services.candle_analysis_service import CandleAnalysisService
 from services.candle_service import CandleService
-from services.llm_service import LLMService
+from services.decision_service import DecisionService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
 
@@ -95,7 +96,7 @@ class SingletonPack:
         self.set_upbit_client(UpbitClient(self.MARKET, self.DEBUG))
         self.set_action_service(ActionService(self.DCA, self.DEBUG))
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG, self.DEBUG))
-        self.set_llm_service(LLMService(self.LLM_REQUEST_SCHEME, self.DEBUG))
+        self.set_decision_service(CandleAnalysisService(debug=self.DEBUG))
         self.set_candle_service(CandleService())
         self.set_llm_log_repo(LLMLogRepo())
         self.set_member_repo(MemberRepo())
@@ -108,11 +109,12 @@ class SingletonPack:
         self.trade_service.set_action_service(self.action_service)
         self.trade_service.set_dbms(self.dbms)
         self.trade_service.set_member_repo(self.member_repo)
-        self.trade_service.set_llm_service(self.llm_service)
-        self.llm_service.set_gemini_client(self.gemini_client)
-        self.llm_service.set_candle_service(self.candle_service)
-        self.llm_service.set_llm_log_repo(self.llm_log_repo)
-        self.llm_service.set_dbms(self.dbms)
+        self.trade_service.set_decision_service(self.decision_service)
+        # LLMService 클래스 사용 시시
+        # self.llm_service.set_gemini_client(self.gemini_client)
+        # self.llm_service.set_candle_service(self.candle_service)
+        # self.llm_service.set_llm_log_repo(self.llm_log_repo)
+        # self.llm_service.set_dbms(self.dbms)
         self.action_service.set_action_repo(self.action_repo)
         self.action_service.set_coin_repo(self.coin_repo)
     
@@ -170,8 +172,8 @@ class SingletonPack:
     def set_trade_service(self, trade_service: TradeService):
         self.trade_service = trade_service
         
-    def set_llm_service(self, llm_service: LLMService):
-        self.llm_service = llm_service
+    def set_decision_service(self, decision_service: DecisionService):
+        self.decision_service = decision_service
         
     def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
         self.llm_log_repo = llm_log_repo

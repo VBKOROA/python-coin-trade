@@ -107,9 +107,9 @@ class UpbitClient:
         }
         
         data = await self.__req_data(unit, params, session)
-        completed_time = self.__get_completed_candle_time(timeframe)
+        # completed_time = self.__get_completed_candle_time(timeframe)
         
-        return self.__filter_incomplete_candles(data, completed_time)
+        return data
     
     async def fetch_candle_chart(self, timeframe_config=None) -> CandleChart:
         """

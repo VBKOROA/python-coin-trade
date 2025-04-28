@@ -6,9 +6,10 @@ from dtos.candle_chart import CandleChart
 from dtos.decision import Decision
 from repos.llm_log_repo import LLMLogRepo
 from services.candle_service import CandleService
+from services.decision_service import DecisionService
 from settings.db_connection import DBMS
 
-class LLMService:
+class LLMService(DecisionService):
     def __init__(self, llm_request_scheme: str, debug = False):
         self.__llm_request_scheme = llm_request_scheme
         self.__debug = debug

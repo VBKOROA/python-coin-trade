@@ -1,9 +1,10 @@
 from clients.upbit_client import UpbitClient
+from services.decision_service import DecisionService
 from tables.coin import Coin
 from dtos.decision import Decision
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
-from services.llm_service import LLMService
+from services.candle_analysis_service import CandleAnalysisService
 from settings.db_connection import DBMS
 from dtos.candle_chart import CandleChart # CandleChart 임포트 추가 (타입 힌팅용)
 from tables.member import Member # Member 임포트 추가 (타입 힌팅용)
@@ -21,8 +22,8 @@ class TradeService:
     def set_action_service(self, action_service: ActionService):
         self.__action_service = action_service
         
-    def set_llm_service(self, llm_service: LLMService):
-        self.__llm_service = llm_service
+    def set_decision_service(self, decision_service: DecisionService):
+        self.__decision_service = decision_service
         
     def set_member_repo(self, member_repo: MemberRepo):
         self.__member_repo = member_repo
@@ -47,8 +48,8 @@ class TradeService:
              return None
         self._log_debug("Candle chart fetched.")
 
-        self._log_debug("Requesting trade decision from LLM...")
-        decision: Decision = await self.__llm_service.execute_trade_decision(candle_chart)
+        self._log_debug("Requesting trade decision from Decision Service...")
+        decision: Decision = await self.__decision_service.execute_trade_decision(candle_chart)
         self._log_debug(f"Received decision: {decision.action} (Desired state)")
 
         self._log_debug(f"Fetching member {member_id} and their coin...")
@@ -61,29 +62,32 @@ class TradeService:
         return candle_chart, decision, member
 
     def _execute_action_based_on_decision(self, member: Member, decision: Decision, session):
-        """LLM 결정과 현재 상태를 비교하여 매수/매도 액션을 실행합니다."""
+        """CandleAnalysisService 결정과 현재 상태를 비교하여 매수/매도 액션을 실행합니다."""
         current_coin: Optional[Coin] = member.coin
         has_coin = current_coin is not None
-        action = decision.action
+        action = decision.action # CandleAnalysisService는 'BUY', 'SELL', 'NEUTRAL' 등을 반환
 
-        if action == "hold":
+        # CandleAnalysisService의 'BUY' 액션 처리
+        if action == "BUY":
             if not has_coin:
-                self._log_debug("Decision is 'hold' and member does not have coin. Proceeding with buy.", False)
+                self._log_debug(f"Decision is 'BUY' and member does not have coin. Proceeding with buy. Reason: {decision.reason}", False)
                 self.__action_service.buy_coin(member, decision, session)
                 self._log_debug("Buy action completed.")
             else:
-                self._log_debug("Decision is 'hold' and member already has coin. No action needed.", False)
-        elif action == "release":
+                self._log_debug(f"Decision is 'BUY' but member already has coin. No action needed. Reason: {decision.reason}", False)
+        # CandleAnalysisService의 'SELL' 액션 처리
+        elif action == "SELL":
             if has_coin:
-                self._log_debug("Decision is 'release' and member has coin. Proceeding with sell.", False)
+                self._log_debug(f"Decision is 'SELL' and member has coin. Proceeding with sell. Reason: {decision.reason}", False)
                 # current_coin은 None이 아님이 보장됨
                 self.__action_service.sell_coin(current_coin, decision, session)
                 self._log_debug("Sell action completed.")
             else:
-                self._log_debug("Decision is 'release' and member does not have coin. No action needed.", False)
+                self._log_debug(f"Decision is 'SELL' but member does not have coin. No action needed. Reason: {decision.reason}", False)
+        # 'NEUTRAL' 또는 기타 액션 처리
         else:
-            # 'hold', 'release' 외 다른 값이거나 LLM 오류 시 (기본값 'wait' 등)
-            self._log_debug(f"Decision is '{action}'. No action taken.", False)
+            # 'BUY', 'SELL' 외 다른 값이거나 분석 결과가 중립일 경우 ('NEUTRAL' 등)
+            self._log_debug(f"Decision is '{action}'. No action taken. Reason: {decision.reason}", False)
 
     async def execute_trade_logic(self, member_id: int):
         self._log_debug(f"Executing trade logic for member ID: {member_id}")

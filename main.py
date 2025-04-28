@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
         # 설정값 출력
         print("================ Settings ================")
-        print(f"  LLM Model: {s_pack.LLM_MODEL}")
+        print(f"  Decision Service: {s_pack.decision_service.__class__.__name__}")
         print(f"  Market: {s_pack.MARKET}")
         print(f"  DCA Percentage: {s_pack.DCA * 100:.2f}%") # 소수점 표시 개선
         print(f"  Timeframe Config: {s_pack.TIMEFRAME_CONFIG}")
