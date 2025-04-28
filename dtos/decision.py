@@ -2,8 +2,8 @@ class Decision:
     def __init__(self, decision: dict):
         self.action = decision["action"]
         self.reason = decision["reason"]
-        self.current_price = None
-        self.market = None
+        self.current_price: int = None
+        self.market: str = None
         
     def set_current_price(self, current_price: int):
         self.current_price = current_price

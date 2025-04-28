@@ -3,8 +3,8 @@ import json
 class CandleChart:
     def __init__(self):
         self.candles = {}  # 시간대별 캔들 데이터를 저장하는 딕셔너리
-        self.current_price = None
-        self.market = None
+        self.current_price: int = None
+        self.market: str = None
         
     def set_candles(self, timeframe, candles):
         """
@@ -37,7 +37,7 @@ class CandleChart:
         """
         return list(self.candles.keys())
         
-    def set_current_price(self, price):
+    def set_current_price(self, price: int):
         self.current_price = price
         
     def set_market(self, market):
