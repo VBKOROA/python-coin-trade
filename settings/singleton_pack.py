@@ -110,7 +110,6 @@ class SingletonPack:
         self.trade_service.set_dbms(self.dbms)
         self.trade_service.set_member_repo(self.member_repo)
         self.trade_service.set_decision_service(self.decision_service)
-        self.trade_service.set_decision_log_repo(self.decision_log_repo)
         # LLMService 클래스 사용 시시
         # self.llm_service.set_gemini_client(self.gemini_client)
         # self.llm_service.set_candle_service(self.candle_service)

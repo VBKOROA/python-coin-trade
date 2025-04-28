@@ -29,9 +29,6 @@ class TradeService:
     def set_member_repo(self, member_repo: MemberRepo):
         self.__member_repo = member_repo
         
-    def set_decision_log_repo(self, decision_log_repo: DecisionLogRepo):
-        self.__decision_log_repo = decision_log_repo
-        
     def set_dbms(self, dbms: DBMS):
         self.__dbms = dbms
 
