@@ -3,27 +3,22 @@ from clients.upbit_client import UpbitClient
 from dtos.decision import Decision
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
-from services.llm_service import LLMService
+from services.decision_service import DecisionService
 from services.trade_service import TradeService
 from settings.db_connection import DBMS
 from settings.singleton_pack import SingletonPack as sgtPack
 
-async def test_candle_and_gemini(upbit_client: UpbitClient, llm_service: LLMService):
+async def test_candle_and_decision(upbit_client: UpbitClient, decision_service: DecisionService):
     """
     캔들 데이터를 가져와 LLM에게 거래 결정을 요청하는 테스트 함수.
     """
     # 먼저 캔들 차트를 가져온다.
-    # 예: 5분봉 25개 캔들
-    candle_chart = await upbit_client.fetch_candle_chart({"15m": 25, "5m": 25, "4h": 25})
-
-    if not candle_chart or not candle_chart.get_candles("15m"):
-        print("캔들 데이터를 가져오는데 실패했습니다.")
-        return
+    candle_chart = await upbit_client.fetch_candle_chart({"5m": 125, "4h": 125})
 
     print("가져온 캔들 차트:", candle_chart)
 
     # AI한테 결정을 요청한다.
-    decision = await llm_service.execute_trade_decision(candle_chart)
+    decision = decision_service.execute_trade_decision(candle_chart)
 
     print("결정:", decision)
     
@@ -88,7 +83,7 @@ if __name__ == "__main__":
     try:
         # asyncio.run(test_trade_logic(s_pack.trade_service))
         # buy_and_sell_test(s_pack.action_service, s_pack.member_repo, s_pack.dbms)
-        asyncio.run(test_candle_and_gemini(s_pack.upbit_client, s_pack.llm_service))
+        asyncio.run(test_candle_and_decision(s_pack.upbit_client, s_pack.decision_service))
         # Clear and recreate all tables after tests
         print("Clearing and recreating all database tables...")
         s_pack.dbms.setup(drop=True)
