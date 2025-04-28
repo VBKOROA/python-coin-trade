@@ -4,7 +4,7 @@ import datetime
 from clients.gemini_client import GeminiClient
 from dtos.candle_chart import CandleChart
 from dtos.decision import Decision
-from repos.llm_log_repo import LLMLogRepo
+from repos.decision_log_repo import DecisionLogRepo
 from services.candle_service import CandleService
 from services.decision_service import DecisionService
 from settings.db_connection import DBMS
@@ -25,8 +25,8 @@ class LLMService(DecisionService):
     def set_candle_service(self, candle_service: CandleService):
         self.__candle_service = candle_service
         
-    def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
-        self.__llm_log_repo = llm_log_repo
+    def set_decision_log_repo(self, decision_log_repo: DecisionLogRepo):
+        self.__decision_log_repo = decision_log_repo
         
     def set_dbms(self, dbms: DBMS):
         self.__dbms = dbms
@@ -75,7 +75,7 @@ class LLMService(DecisionService):
         """결정을 데이터베이스에 로깅합니다."""
         try:
             with self.__dbms.get_session() as session:
-                self.__llm_log_repo.log_decision(decision, session)
+                self.__decision_log_repo.log_decision(decision, session)
             self._log_debug("Logged decision to DB.")
         except Exception as log_error:
             self._log_debug(f"Error logging decision to DB: {str(log_error)}")

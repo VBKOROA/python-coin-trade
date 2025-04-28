@@ -1,8 +1,8 @@
 from sqlalchemy import Column, DateTime, Integer, String, Text, func
 from settings.db_connection import Base
 
-class LLMLog(Base):
-    __tablename__ = "llm_log"
+class DecisionLog(Base):
+    __tablename__ = "decision_log"
     
     id = Column(Integer, primary_key=True, autoincrement=True) # 기본키
     action = Column(String(10), nullable=False) # 행동 (buy, sell, wait)

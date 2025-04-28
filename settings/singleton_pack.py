@@ -6,7 +6,7 @@ from clients.gemini_client import GeminiClient
 from clients.upbit_client import UpbitClient
 from repos.action_repo import ActionRepo
 from repos.coin_repo import CoinRepo
-from repos.llm_log_repo import LLMLogRepo
+from repos.decision_log_repo import DecisionLogRepo
 from repos.member_repo import MemberRepo
 from services.action_service import ActionService
 from services.candle_analysis_service import CandleAnalysisService
@@ -98,7 +98,7 @@ class SingletonPack:
         self.set_trade_service(TradeService(self.TIMEFRAME_CONFIG, self.DEBUG))
         self.set_decision_service(CandleAnalysisService(debug=self.DEBUG))
         self.set_candle_service(CandleService())
-        self.set_llm_log_repo(LLMLogRepo())
+        self.set_decision_log_repo(DecisionLogRepo())
         self.set_member_repo(MemberRepo())
         self.set_action_repo(ActionRepo())
         self.set_coin_repo(CoinRepo())
@@ -110,6 +110,7 @@ class SingletonPack:
         self.trade_service.set_dbms(self.dbms)
         self.trade_service.set_member_repo(self.member_repo)
         self.trade_service.set_decision_service(self.decision_service)
+        self.trade_service.set_decision_log_repo(self.decision_log_repo)
         # LLMService 클래스 사용 시시
         # self.llm_service.set_gemini_client(self.gemini_client)
         # self.llm_service.set_candle_service(self.candle_service)
@@ -175,8 +176,8 @@ class SingletonPack:
     def set_decision_service(self, decision_service: DecisionService):
         self.decision_service = decision_service
         
-    def set_llm_log_repo(self, llm_log_repo: LLMLogRepo):
-        self.llm_log_repo = llm_log_repo
+    def set_decision_log_repo(self, decision_log_repo: DecisionLogRepo):
+        self.decision_log_repo = decision_log_repo
         
     def set_member_repo(self, member_repo: MemberRepo):
         self.member_repo = member_repo

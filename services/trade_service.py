@@ -1,4 +1,5 @@
 from clients.upbit_client import UpbitClient
+from repos.decision_log_repo import DecisionLogRepo
 from services.decision_service import DecisionService
 from tables.coin import Coin
 from dtos.decision import Decision
@@ -27,6 +28,9 @@ class TradeService:
         
     def set_member_repo(self, member_repo: MemberRepo):
         self.__member_repo = member_repo
+        
+    def set_decision_log_repo(self, decision_log_repo: DecisionLogRepo):
+        self.__decision_log_repo = decision_log_repo
         
     def set_dbms(self, dbms: DBMS):
         self.__dbms = dbms
